@@ -5,7 +5,7 @@
           <img src="../assets/signedOut.png" class="avatar rounded" />
         </div>
         <button
-          style="width: 20%"
+          style="width: 25%"
           class="btn btn-success"
           v-on:click="$emit('signIn')"
         >
@@ -20,15 +20,19 @@
           />
         </div>
         <div class="text-truncate">
-          <div>
+          <!-- <div id="id-state">
             {{ identity.state }}
             <br />
             <div class="address text-truncate">
               {{ identity.address }}
             </div>
-          </div>
+          </div> -->
         </div>
-        <button class="btn btn-outline-danger" @click.stop="$emit('signOut')">
+        <button style="width: 25%" class="btn btn-outline-danger" @click.stop="$emit('signOut')">
+          SIGN OUT
+          <!-- <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+  <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+</svg> -->
           <!-- <b-icon-x /> --> 
         </button>
       </div>
@@ -60,6 +64,14 @@
   </script>
   
   <style scoped>
+
+  .text-truncate{
+    color:white;
+  }
+  
+  /* #id-state{
+    color:white;
+  } */
   
   #signin{
     width: 50%;

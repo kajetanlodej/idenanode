@@ -8,6 +8,13 @@
   place-items: center;
 }
 
+button {
+  font-family: 'Lexend Exa', sans-serif;
+  font-size: 1em;
+}
+a{
+  color:white;
+}
 /* a,
 .green {
   text-decoration: none;

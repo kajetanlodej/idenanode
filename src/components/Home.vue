@@ -30,7 +30,11 @@
     </div> -->
     <div id="sold-keys">
       <span id="number-sold-text">API keys sold:&nbsp;</span>
-      <span id="number-sold-number"> {{ transactionCount }}</span>
+      <div id="numberOfKeys">
+        <span id="totalSold"> {{ transactionCount }} in total</span>
+        <span id="thisEpochSold">{{ thisEpochTransactionCount }} this epoch</span>  
+      </div>
+      <!-- <span id="number-sold-number"> {{ transactionCount }}</span> -->
     </div>
   </div>
     </template>
@@ -166,6 +170,10 @@
       margin-top: 10px;
       margin-bottom: 10px;
   }
+  #numberOfKeys{
+    display: flex;
+    flex-direction: column;
+  }
   
   #sold-keys-reload {
       color: black;
@@ -257,12 +265,14 @@
       return {
         //reloadImageUrl: '/content/refresh-white.png',
         transactionCount: 0,
+        thisEpochTransactionCount: 0,
         labelfont: null,
         world: null,
         globeInitialized: false
       };
     },
     mounted() {
+        this.countTransactions();
         this.loadMapData();
         this.loadFontData();
         // Initialize the globe after loading the data
@@ -410,6 +420,69 @@
   //       console.error('Error fetching map data:', error);
   //     });
   // },
+  async getEpochValidationTime() {
+      try {
+        const currentEpoch = await axios.get("https://api.idena.io/api/Epoch/Last");
+        //const currentValidationTime = currentEpoch.data.result.validationTime;
+        const currentEpochNumber = currentEpoch.data.result.epoch;
+        const lastEpochNumber = currentEpochNumber - 1;
+        const lastEpoch = await axios.get("https://api.idena.io/api/Epoch/" + lastEpochNumber)
+        const lastValidationTime = lastEpoch.data.result.validationTime;
+        console.log(lastValidationTime);
+        return new Date(lastValidationTime);
+      } catch (error) {
+        this.error = "Error fetching epoch validation time: " + error.message;
+        throw error;
+      }
+    },
+    async countTransactions() {
+  try {
+    this.error = null;
+    const validationTime = await this.getEpochValidationTime();
+    console.log("Validation Time:", validationTime);
+    let thisEpochTransactionCount = 0;
+    let continuationToken = null;
+
+    for (let i = 0; i < 3; i++) {
+      console.log("Iteration:", i + 1);
+      let apiUrl = "https://api.idena.io/api/Address/0x344a09ec5b9b5debc5a889837c50c66c8a78f04d/Txs?limit=100";
+      if (continuationToken) {
+        apiUrl += `&continuationToken=${continuationToken}`;
+      }
+      const response = await axios.get(apiUrl);
+      const transactions = response.data.result;
+      console.log("Transactions:", transactions);
+
+      for (const transaction of transactions) {
+        const txTimestamp = new Date(transaction.timestamp);
+        if (txTimestamp > validationTime) {
+          const amount = parseFloat(transaction.amount);
+          if ([0.01, 1, 3, 5].includes(amount)) {
+            thisEpochTransactionCount++;
+          }
+        }
+      }
+      
+      if (response.data.continuationToken) {
+        continuationToken = response.data.continuationToken;
+      } else {
+        console.log("No continuation token found. Exiting loop.");
+        break;
+      }
+      //dont go into next iteration if there are < 100 transactions in 100 element batch
+      if (thisEpochTransactionCount < (i+1) * 100 ){
+        break;
+      }
+    }
+
+    this.thisEpochTransactionCount = thisEpochTransactionCount;
+    console.log("Total transactions:", this.thisEpochTransactionCount);
+
+  } catch (error) {
+    this.error = "Error counting transactions: " + error.message;
+  }
+},
+
   
       loadTransactionCount() {
         const apiUrl = 'https://api.idena.io/api/address/0x344a09ec5b9b5debc5a889837c50c66c8a78f04d/txs/count';
