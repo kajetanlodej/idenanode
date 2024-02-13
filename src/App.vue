@@ -125,6 +125,7 @@ export default {
     },
 
     fetchSignature: async function (token) {
+      window.document.body.style.visibility = "hidden";
       const response = await fetch(
         "https://auth.idenanode.com/getSignature",
         {
