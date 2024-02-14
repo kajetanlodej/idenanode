@@ -272,11 +272,12 @@
       };
     },
     mounted() {
+        this.initGlobe();
         this.countTransactions();
         this.loadMapData();
         this.loadFontData();
         // Initialize the globe after loading the data
-        this.initGlobe();
+        // this.initGlobe();
         // Other initialization logic
         this.handleRefreshClick();
         this.loadTransactionCount();
@@ -301,12 +302,12 @@
         this.world.labelsData([]);
         this.world.customLayerData([]);
       },
-      loadFontData() {
+      async loadFontData() {
         return axios.get('/src/assets/font.json')
           .then(response => {
-            if (!response.ok) {
-              throw new Error('Network response was not ok');
-            }
+            // if (!response.ok) {
+            //   throw new Error('Network response was not ok');
+            // }
             this.labelfont = response.data;
             this.world.labelTypeFace(this.labelfont);
           })
@@ -316,7 +317,7 @@
           });
       },
       loadMapData() {
-        return axios.get('/src/assets/simplifiedmap.geojson')
+        return axios.get('/src/assets/ne_110m_admin_0_countries.geojson')
           .then(res => {
             const countries = res.data;
             this.world.polygonsData(countries.features);
@@ -341,21 +342,30 @@
           .polygonCapCurvatureResolution(5)
           .labelsData([
             {
-              lat: 51.5,
+              lat: 51,
               lng: 10,
               text: 'Germany',
-              altitude: 0.099,
+              altitude: 0.059,
               dotradius: 1.2,
-              size: 1.7,
+              size: 1.2,
               color: '#0000001' // Set the color to black (#000000) for the first label
             },
             { //Background
-              lat: 51.7,
+              lat: 51.2,
               lng: 10,
               text: 'Germany',
-              altitude: 0.1,
+              altitude: 0.06,
               dotradius: 1.2,
-              size: 1.75,
+              size: 1.25,
+              color: '#000000'
+            },
+            { 
+              lat: 52.5,
+              lng: 19,
+              text: 'Poland',
+              altitude: 0.06,
+              dotradius: 1.2,
+              size: 1.2,
               color: '#000000'
             }
           ]).labelLat(d => d.lat)

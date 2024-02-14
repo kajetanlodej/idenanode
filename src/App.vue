@@ -389,7 +389,7 @@ export default {
       this.address = localStorage.address;
     }
     window.addEventListener("storage", this.onStorageUpdate);
-    this.fetchRecentlyMinted();
+    // this.fetchRecentlyMinted();
   },
   beforeDestroy() {
     window.removeEventListener("storage", this.onStorageUpdate);
