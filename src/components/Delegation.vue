@@ -13,19 +13,23 @@
       <span>Delegate to idenanode.com pool:</span>
     <button>DELEGATE</button>
     <div id="delegationStatus">
-    <span>Your Idena identity is currently</span> <span>delegated/ undelegated</span> <span>to idenanode.com</span>
+    <span>Your Idena identity is currently</span> <span>delegated / undelegated</span> <span>to idenanode.com</span>
   </div>
   </div>
+  <div id="stats">
   <div id="identityStats">
     <h2>Identity stats</h2>
-      <span>Estimated epoch mining rewards: {{ delegatorsCount }}</span>
-      <span>Estimated epoch validation rewards: {{ totalStake }} iDNA</span>
-      <span>Total rewards received from idenanode.com pool: </span>
+      <!-- <span>Mining reward: {{ delegatorsCount }} iDNA</span>
+      <span>Validation reward: {{ totalStake }} iDNA</span>
+      <span>Extra flip premium: 100 iDNA </span>
+      <span>Invitation reward: 100 iDNA</span> -->
+      <span>Total rewards received: 200 iDNA </span>
+      <span>Rewards last received on: 16.02.2024</span>
     </div>
     <div id="poolStats">
       <h2>Pool stats</h2>
-      <span>Identities delegated to idenanode.com pool: {{ delegatorsCount }}</span>
-      <span>Total stake delegated to idenanode.com pool: {{ totalStake }} iDNA</span>
+      <span>Identities: {{ delegatorsCount }}</span>
+      <span>Total stake: {{ totalStake }} iDNA</span>
     </div>
     <!-- <div id="aboutDelegation">
       <span>See <a target="_blank" href="https://www.idena.io/pl/faq#faq-delegation-1">official FAQ</a> on idena.io to learn more about delegation.</span>
@@ -33,6 +37,7 @@
       <span>Delegate your identity only to a trusted pool.</span>
     </div> -->
   </div>
+</div>
 </template>
 
 <script>
@@ -136,6 +141,7 @@ span{
 }
 #poolStats
 {
+  width: 50%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -183,6 +189,7 @@ button{
 }
 
 #identityStats{
+  width: 50%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -190,5 +197,26 @@ button{
   margin-top: 2rem;
   font-weight: 600;
   color: white;
+  border-right: solid;
+}
+#poolStats{
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 1rem;
+  margin-top: 2rem;
+  font-weight: 600;
+  color: white;
+}
+#stats{
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  font-size: 1rem;
+  margin-top: 2rem;
+  font-weight: 600;
+  color: white;
+  justify-content: center;
 }
 </style>
