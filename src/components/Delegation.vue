@@ -3,24 +3,35 @@
   <div id ="delegationwrapper">
     <div id ="countdown">
       <span id="clock">{{ countdown }}</span>
-      <span>Until the next distribution of rewards</span>
+      <span>Until the next distribution of mining rewards</span>
+    </div>
+    <div id="validation">
+      <hr/>
+      <span>Validation rewards are distributed right after the validation ends</span>
     </div>
     <div id="delegation">
       <span>Delegate to idenanode.com pool:</span>
-    <button>Delegate</button>
+    <button>DELEGATE</button>
     <div id="delegationStatus">
     <span>Your Idena identity is currently</span> <span>delegated/ undelegated</span> <span>to idenanode.com</span>
   </div>
   </div>
+  <div id="identityStats">
+    <h2>Identity stats</h2>
+      <span>Estimated epoch mining rewards: {{ delegatorsCount }}</span>
+      <span>Estimated epoch validation rewards: {{ totalStake }} iDNA</span>
+      <span>Total rewards received from idenanode.com pool: </span>
+    </div>
     <div id="poolStats">
+      <h2>Pool stats</h2>
       <span>Identities delegated to idenanode.com pool: {{ delegatorsCount }}</span>
       <span>Total stake delegated to idenanode.com pool: {{ totalStake }} iDNA</span>
     </div>
-    <div id="aboutDelegation">
+    <!-- <div id="aboutDelegation">
       <span>See <a target="_blank" href="https://www.idena.io/pl/faq#faq-delegation-1">official FAQ</a> on idena.io to learn more about delegation.</span>
       <span>Be aware that pool owner has the ability to terminate delegated identity and pocket its stake.</span>
       <span>Delegate your identity only to a trusted pool.</span>
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -84,7 +95,7 @@ export default {
 };
 </script>      
 
-<style>
+<style scoped>
 /* h2,h1{
   color:white;
 } */
@@ -107,7 +118,7 @@ span{
   display: flex;
   flex-direction: column;
   align-items: center;
-  font-size: 2rem;
+  font-size: 1.5rem;
   margin-top: 2rem;
   font-weight: 600;
   color: white;
@@ -118,7 +129,7 @@ span{
   display: flex;
   flex-direction: column;
   align-items: center;
-  font-size: 2rem;
+  font-size: 1rem;
   margin-top: 2rem;
   font-weight: 600;
   color: white;
@@ -128,7 +139,7 @@ span{
   display: flex;
   flex-direction: column;
   align-items: center;
-  font-size: 2rem;
+  font-size: 1rem;
   margin-top: 2rem;
   font-weight: 600;
   color: white;
@@ -149,6 +160,29 @@ span{
   color: white;
 }
 #aboutDelegation{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 1rem;
+  margin-top: 2rem;
+  font-weight: 600;
+  color: white;
+}
+button{
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 12px;
+}
+
+#identityStats{
   display: flex;
   flex-direction: column;
   align-items: center;
