@@ -16,13 +16,13 @@
     <span>Your Idena identity is currently</span> <span>delegated / undelegated</span> <span>to idenanode.com</span>
   </div>
   </div>
-  <div id="stats">
+  <!-- <div id="stats">
   <div id="identityStats">
     <h2>Identity stats</h2>
-      <!-- <span>Mining reward: {{ delegatorsCount }} iDNA</span>
+      <span>Mining reward: {{ delegatorsCount }} iDNA</span>
       <span>Validation reward: {{ totalStake }} iDNA</span>
       <span>Extra flip premium: 100 iDNA </span>
-      <span>Invitation reward: 100 iDNA</span> -->
+      <span>Invitation reward: 100 iDNA</span>
       <span>Total rewards received: 200 iDNA </span>
       <span>Rewards last received on: 16.02.2024</span>
     </div>
@@ -31,12 +31,25 @@
       <span>Identities: {{ delegatorsCount }}</span>
       <span>Total stake: {{ totalStake }} iDNA</span>
     </div>
-    <!-- <div id="aboutDelegation">
+    <div id="aboutDelegation">
       <span>See <a target="_blank" href="https://www.idena.io/pl/faq#faq-delegation-1">official FAQ</a> on idena.io to learn more about delegation.</span>
       <span>Be aware that pool owner has the ability to terminate delegated identity and pocket its stake.</span>
       <span>Delegate your identity only to a trusted pool.</span>
-    </div> -->
-  </div>
+    </div>
+  </div> -->
+  <div>
+    <tabs wrapper-class="tabs-component" nav-class="tabs-component-tabs">
+        <tab name="First tab" nav-item-class="tabs-component-tab" nav-item-active-class="is-active">
+            First tab content
+        </tab>
+        <tab name="Second tab" nav-item-class="tabs-component-tab" nav-item-active-class="is-active">
+            Second tab content
+        </tab>
+        <tab name="Third tab" nav-item-class="tabs-component-tab" nav-item-active-class="is-active">
+            Third tab content
+        </tab>
+    </tabs>
+</div>
 </div>
 </template>
 
@@ -113,7 +126,6 @@ span{
 #delegationwrapper{
   display: flex;
   justify-content: center;
-  align-items: center;
   height: 90vh;
   flex-direction: column;
   font-family: 'Lexend Exa', sans-serif;
@@ -219,4 +231,42 @@ button{
   color: white;
   justify-content: center;
 }
+.tabs-component {
+    display: flex;
+    flex-direction: column;
+}
+
+.tabs-component-tabs {
+    display: flex;
+    justify-content: space-between;
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.tabs-component-tab {
+    padding: 10px 20px;
+    cursor: pointer;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    transition: background-color 0.3s ease;
+}
+
+.tabs-component-tab-a {
+    text-decoration: none;
+    color: #333;
+}
+
+.tabs-component-tab.is-active,
+.tabs-component-tab:hover {
+    background-color: #ddd;
+}
+
+.tabs-component-panels {
+    margin-top: 20px;
+    padding: 20px;
+    border: 1px solid #ccc;
+}
+
+  
 </style>
