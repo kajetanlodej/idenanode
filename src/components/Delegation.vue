@@ -1,23 +1,74 @@
 
 <template>
-  <div id="delegationwrapper">
-    <div id="countdown">
-      <span id="clock">{{ countdown }}</span>
+  <div id="wrapper">
+    <div id ="prediction">
+    <div id ="title">
+      <h3> REWARDS CALCULATION</h3>
     </div>
-    <div id="validation">
+    <div id ="stakeApy">
+      <div>
+        Stake, iDNA
+      </div>
+      <div>
+        APY, %
+      </div>
+    </div>
+    <div id="values">
+      <div>
+        {{ amountValue }}
+      </div>
+      <div>
+        {{parseFloat(
+          (
+            (
+              (
+                calcStakingReward(amountValue) +
+                calcMiningReward(amountValue) +
+                calcExtraFlipReward(amountValue) +
+                calcInvitationReward(amountValue)
+              ) * 100 / amountValue
+            ) * 366
+          ) / epochTime.epochDuration * 0.9 
+        ).toFixed(2)}}
+      </div>
+    </div>
+    <div id="calculation"> 
+      <!-- 90% of the rewards are distributed to the delegators. The remaining 10% are distributed to the pool owner. -->
+      <div class="rewards">
+      <div>Mining reward: </div> <div>{{parseFloat(calcMiningReward(amountValue) * 0.9).toFixed(2)}} iDNA</div>
+      </div>
+      <div class="rewards">
+      <div>Validation reward:</div> <div>{{parseFloat(calcStakingReward(amountValue) * 0.9).toFixed(2)}} iDNA</div>
+      </div>
+      <div class="rewards">
+      <div>Extra flip reward: </div> <div>{{parseFloat(calcExtraFlipReward(amountValue) * 0.9).toFixed(2)}} iDNA </div>
+      </div>
+      <div class="rewards">
+      <div>Invitation reward:</div> <div>{{parseFloat(calcInvitationReward(amountValue) * 0.9).toFixed(2)}} iDNA</div>
+      </div>
+      <hr/>
+      <div class="rewards" id="total">
+      <div>Total epoch reward: </div> <div>{{parseFloat((calcMiningReward(amountValue)+calcStakingReward(amountValue)+calcExtraFlipReward(amountValue)+calcInvitationReward(amountValue))*0.9 ).toFixed(2)}} iDNA</div>
+      </div>
+
+  </div>
+</div>
+    <!-- <div id="countdown">
+      <span id="clock">{{ countdown }}</span>
+    </div> -->
+    <!-- <div id="validation">
       <span>Until the next distribution of mining rewards</span>
       <hr id="divider" />
       <span>Validation rewards are distributed right after the validation ends</span>
-    </div>
-    <div id="delegation">
+    </div> -->
+    <!-- <div id="delegation">
       <span>Delegate to idenanode.com pool:</span>
       <button>DELEGATE</button>
       <div id="delegationStatus">
         <span>Your Idena identity is currently</span> <span>delegated / undelegated</span>
         <span>to idenanode.com</span>
       </div>
-    </div>
-  </div>
+    </div> -->
 
     <!-- <div id="stats">
   <div id="identityStats">
@@ -43,8 +94,8 @@
   <div class="container">
 
   <ul class="nav nav-tabs">
-    <li class="active"><a data-toggle="tab" href="#home">Pool's delegators</a></li>
-    <li><a data-toggle="tab" href="#menu1">Payout history</a></li>
+    <li class="active"><a data-toggle="tab" href="#home">Pool's delegators: {{ totalDelegators }}</a></li>
+    <li><a data-toggle="tab" href="#menu1">Identity payout history</a></li>
     <!-- <li><a data-toggle="tab" href="#menu2">Menu 2</a></li>
     <li><a data-toggle="tab" href="#menu3">Menu 3</a></li> -->
   </ul>
@@ -68,10 +119,9 @@
             <div class="user-pic">
               <img :src="delegator.address ? `https://robohash.idena.io/${delegator.address.toLowerCase()}` : ''" alt="pic" width="32" />            </div>
             <div class="text_block text_block--ellipsis">
-              <router-link :to="`/address/${delegator.address}`">
-                {{ delegator.address }}
-              </router-link>
-            </div>
+              <a :href="`https://scan.idena.io/address/${delegator.address}`" target="_blank" @click="$event.target.blur()">
+  {{ delegator.address }}
+</a>            </div>
           </div>
           </td>
           <td class="rowElement">{{ parseFloat(delegator.stake).toFixed(2) }}</td>
@@ -81,10 +131,8 @@
       </tbody>
     </table>
     <div class="text-center" v-if="canFetchMore">
-      <button type="button" class="btn btn-small" @click="fetchMore">
-        Show more
-      </button>
-    </div>
+      <button v-if="dataLoaded && !allDataFetched" @click="fetchMore">Show More</button>
+       </div>
   </div>
     </div>
     <div id="menu1" class="tab-pane fade">
@@ -101,6 +149,8 @@
     </div> -->
   </div>
 </div>
+</div>
+
 </template>
 <script>
 import axios from 'axios'
@@ -112,13 +162,105 @@ export default {
       delegators: [],
       canFetchMore: true,
       continuationToken: null,
+      limit: 30,
+      allDataFetched: false,
+      totalDelegators: 0,
+      dataLoaded: false,
+      // Staking stats
+      weight: null,
+      totalShares: null,
+      averageMinerWeight: null,
+      rewardFund: {},
+      rewardWeight: {},
+      onlineSize: null,
+      epochRewardFund: null,
+      totalStake: null,
+      epochNum: null,
+      epochTime: {},
+      STAKING_POWER: 0.9,
+      amountValue: 100000, //change to take into account the amount of the user
     }
   },
   mounted() {
     this.startCountdown()
     this.fetchDelegators()
+    this.fetchTotalDelegators();
+    this.getData();
+
   },
   methods: {
+    async getData() {
+      try {
+        const coinsResponse = await axios.get('https://api.idena.io/api/coins');
+        const stakingResponse = await axios.get('https://api.idena.io/api/staking');
+        const onlineResponse = await axios.get('https://api.idena.io/api/onlineminers/count');
+        const epochResponse = await axios.get('https://api.idena.io/api/epoch/last');
+        const epochNumber = epochResponse.data.result.epoch - 1;
+        const prevEpochResponse = await axios.get(`https://api.idena.io/api/epoch/${epochNumber}`);
+        const rewardsResponse = await axios.get(`https://api.idena.io/api/epoch/${epochNumber}/rewardssummary`);
+
+        const epochStart = new Date(prevEpochResponse.data.result.validationTime);
+        const epochEnd = new Date(epochResponse.data.result.validationTime);
+        const nowDate = new Date();
+        const epochDuration = Math.round(Math.abs((epochEnd.getTime() - epochStart.getTime()) / 86400000));
+        const epochDurationMinutes = epochDuration * 24 * 60;
+        const epochLeftMinutes = Math.round(Math.max(0, ((epochEnd.getTime() - nowDate.getTime()) / 86400000) * 24 * 60));
+        const epochLeftPercent = Math.min(99, (epochLeftMinutes / epochDurationMinutes) * 100);
+        const epochLeft = epochLeftMinutes < 60 ? epochLeftMinutes : epochLeftMinutes > 24 * 60 ? Math.round(epochLeftMinutes / 24 / 60) : Math.round(epochLeftMinutes / 60);
+        const epochLeftUnit = epochLeftMinutes < 60 ? 'Minutes' : epochLeftMinutes > 24 * 60 ? 'Days' : 'Hours';
+
+        this.weight = stakingResponse.data.result.weight;
+        this.totalShares = stakingResponse.data.result.minersWeight;
+        this.averageMinerWeight = stakingResponse.data.result.averageMinerWeight;
+        this.rewardFund = {
+          extraFlips: rewardsResponse.data.result.extraFlips,
+          invitations: rewardsResponse.data.result.invitations,
+        };
+        this.rewardWeight = {
+          extraFlips: stakingResponse.data.result.extraFlipsWeight,
+          invitations: stakingResponse.data.result.invitationsWeight,
+        };
+        this.onlineSize = onlineResponse.data.result;
+        this.epochRewardFund = rewardsResponse.data.result.staking && rewardsResponse.data.result.staking > 0 ? rewardsResponse.data.result.staking : rewardsResponse.data.result.validation * this.STAKING_POWER;
+        this.totalStake = coinsResponse.data.result.totalStake;
+        this.epochNum = epochResponse.data.result.epoch;
+        this.epochTime = {
+          epochDuration,
+          epochLeftPercent,
+          epochLeft,
+          epochLeftUnit,
+        };
+      } catch (e) {
+        console.error('cannot fetch API', e);
+      }
+    },
+    calculateEstimatedMiningReward(stakeWeight, averageMinerWeight, onlineMinersCount, epochDays) {
+    const proposerOnlyReward = (6 * stakeWeight * 20) / (stakeWeight * 20 + averageMinerWeight * 100);
+    const committeeOnlyReward = (6 * stakeWeight) / (stakeWeight + averageMinerWeight * 119);
+    const proposerAndCommitteeReward = (6 * stakeWeight * 21) / (stakeWeight * 21 + averageMinerWeight * 99);
+
+    const proposerProbability = 1 / onlineMinersCount;
+    const committeeProbability = Math.min(100, onlineMinersCount) / onlineMinersCount;
+
+    const proposerOnlyProbability = proposerProbability * (1 - committeeProbability);
+    const committeeOnlyProbability = committeeProbability * (1 - proposerProbability);
+    const proposerAndCommitteeProbability = proposerOnlyProbability * committeeOnlyProbability;
+
+    return ((85000 * epochDays) / 21.0) * (proposerOnlyProbability * proposerOnlyReward + committeeOnlyProbability * committeeOnlyReward + proposerAndCommitteeProbability * proposerAndCommitteeReward);
+  },
+    calcStakingReward(amount) {
+    return (amount ** this.STAKING_POWER / (amount ** this.STAKING_POWER + this.weight)) * this.epochRewardFund;
+  },
+  calcExtraFlipReward(amount) {
+    return (amount ** this.STAKING_POWER / this.rewardWeight.extraFlips) * this.rewardFund.extraFlips;
+  },
+  calcInvitationReward(amount) {
+    return (amount ** this.STAKING_POWER / this.rewardWeight.invitations) * this.rewardFund.invitations;
+  },
+  calcMiningReward(amount) {
+    const myStakeWeight = amount ** this.STAKING_POWER;
+    return this.calculateEstimatedMiningReward(myStakeWeight, this.averageMinerWeight, this.onlineSize, this.epochTime.epochDuration);
+  },
     startCountdown() {
       const countdownInterval = setInterval(() => {
         const now = new Date()
@@ -169,18 +311,36 @@ export default {
       console.log('Tab changed to:' + selectedTab.tab.name)
     },
     async fetchDelegators() {
-  const response = await axios.get(`https://api.idena.io/api/Pool/0x17b851A11f7d37054928BEf47F0F22166d433917/Delegators`, {
+  const response = await axios.get(`https://api.idena.io/api/Pool/0xd8a938bbFeB263dD00c7559271eCcd089fb8b5F4/Delegators`, {
     params: {
-      limit: 30,
+      limit: this.limit,
+      continuationToken: this.continuationToken,
     },
   });
 
-  this.delegators = response.data.result;
-  console.log(response.data.result);
+  // Filter out the 'length' property
+  const delegators = response.data.result.filter(item => item !== 'length');
+
+  this.delegators = [...this.delegators, ...delegators];
+  console.log(delegators);
+  console.log(delegators.length)
+  if (response.data.continuationToken) {
+    this.continuationToken = response.data.continuationToken;
+  } else {
+    this.allDataFetched = true;
+  }
+  this.dataLoaded = true;
 },
-    fetchMore() {
+  async fetchTotalDelegators() {
+    const response = await axios.get(`https://api.idena.io/api/Pool/0xd8a938bbFeB263dD00c7559271eCcd089fb8b5F4/Delegators/Count`);
+    this.totalDelegators = response.data.result;
+    console.log(response.data.result);
+  },
+  fetchMore() {
+    if (!this.allDataFetched) {
       this.fetchDelegators();
-    },
+    }
+  },
   }
 }
 </script>
@@ -190,17 +350,16 @@ export default {
   color:white;
 } */
 
-span {
+/* span {
   color: white;
-}
+} */
 
-#delegationwrapper {
+#wrapper {
   display: flex;
-  justify-content: center;
-  height: 40vh;
+  height: 90vh;
   flex-direction: column;
   font-family: 'Lexend Exa', sans-serif;
-  color: white;
+  color:white
 }
 
 #delegation {
@@ -317,20 +476,99 @@ button {
 
 #divider {
   width: 100%;
+  margin:2px;
 }
 .container{
+  margin-top:2rem;
   width: 100%;
-  height: 50vh;
+  height: 40%;
   color: white;
 }
 #user{
   display: flex;
   align-items: center;
+  
 }
 .rowElement{
   vertical-align: middle;
+  
 }
 th{
-  font-weight: 900;
+  font-weight: 600;
+}
+button:disabled {
+  background-color: #cccccc;
+  color: #666666;
+}
+.user-pic{
+  margin-right: 10px;
+  border-radius: 50%;
+  background-color: white;
+}
+.tab-content{
+  --s: 30px; /* the size on the corner */
+  --t: 1px;  /* the thickness of the border */
+  --g: 20px; /* the gap between the border and image */
+  
+  padding: calc(var(--g) + var(--t));
+  outline: var(--t) solid white; /* the color here */
+  outline-offset: calc(-1*var(--t));
+  mask:
+    conic-gradient(at var(--s) var(--s),#0000 75%,#000 0)
+    0 0/calc(100% - var(--s)) calc(100% - var(--s)),
+    linear-gradient(#000 0 0) content-box;
+  /* transition: .4s; */
+}
+#prediction{
+  height: 40%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+#title{
+  display:flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  text-align: center;
+}
+#stakeApy, #values{
+  width: 60%;
+  display: flex;
+  justify-content: space-between;
+  
+}
+#values{
+  font-size: 3rem;
+  font-weight: 600;
+}
+#stakeApy{
+  color: grey
+}
+#calculation{
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+  margin-top: 2rem;
+  justify-content: space-between;
+}
+
+.rewards{
+  display: flex;
+  justify-content: space-between;
+}
+#total{
+  font-size: 1.75rem;
+}
+.nav-tabs {
+    border-bottom: none;
+}
+a:hover {
+  text-decoration: none;
+}
+
+a:focus {
+  text-decoration: none;
+
 }
 </style>
