@@ -95,7 +95,7 @@
 
   <ul class="nav nav-tabs">
     <li class="active"><a data-toggle="tab" href="#home">Pool's delegators: {{ totalDelegators }}</a></li>
-    <li><a data-toggle="tab" href="#menu1">Identity payout history</a></li>
+    <li><a data-toggle="tab" href="#menu1">Receive history from idenanode.com</a></li>
     <!-- <li><a data-toggle="tab" href="#menu2">Menu 2</a></li>
     <li><a data-toggle="tab" href="#menu3">Menu 3</a></li> -->
   </ul>
@@ -130,14 +130,42 @@
         </tr>
       </tbody>
     </table>
-    <div class="text-center" v-if="canFetchMore">
-      <button v-if="dataLoaded && !allDataFetched" @click="fetchMore">Show More</button>
+    <div class="text-center">
+      <button v-if="dataLoaded && !allDelegatorsFetched" @click="fetchMoreDelegators">Show More</button>
        </div>
   </div>
     </div>
+    <!-- Second tab -->
     <div id="menu1" class="tab-pane fade">
-      <h3>Menu 1</h3>
-      <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+      <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Transaction</th>
+          <!-- <th>From</th>
+          <th>To</th> -->
+          <th>Amount, iDNA</th>
+          <th style="width: 220px;">Timestamp</th>
+          <!-- <th style="width: 100px;">Type</th> -->
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="transaction in transactions" :key="transaction.hash">
+          <td>
+            <div class="text_block text_block--ellipsis" style="width: 80px;">
+              <a :href="`https://scan.idena.io/transaction/${transaction.hash}`" target="_blank" @click="$event.target.blur()">{{ transaction.hash.substring(0, 8) + '...' }}</a>            </div>
+          </td>
+          <td class="rowElement">{{transaction.amount}}</td>
+          <td class="rowElement">{{new Date(transaction.timestamp)}}</td>
+
+          <!-- Similar for other columns... -->
+        </tr>
+      </tbody>
+    </table>
+    <div class="text-center" v-if="canFetchMore">
+      <button v-if="dataLoaded && !allTransactionsFetched" @click="fetchMoreTransactions">Show More</button>
+       </div>
+  </div>
     </div>
     <!-- <div id="menu2" class="tab-pane fade">
       <h3>Menu 2</h3>
@@ -163,7 +191,8 @@ export default {
       canFetchMore: true,
       continuationToken: null,
       limit: 30,
-      allDataFetched: false,
+      allDelegatorsFetched: false,
+      allTransactionsFetched: false,
       totalDelegators: 0,
       dataLoaded: false,
       // Staking stats
@@ -179,6 +208,7 @@ export default {
       epochTime: {},
       STAKING_POWER: 0.9,
       amountValue: 100000, //change to take into account the amount of the user
+      transactions: [],
     }
   },
   mounted() {
@@ -186,6 +216,7 @@ export default {
     this.fetchDelegators()
     this.fetchTotalDelegators();
     this.getData();
+    this.fetchTransactions();
 
   },
   methods: {
@@ -311,7 +342,7 @@ export default {
       console.log('Tab changed to:' + selectedTab.tab.name)
     },
     async fetchDelegators() {
-  const response = await axios.get(`https://api.idena.io/api/Pool/0xd8a938bbFeB263dD00c7559271eCcd089fb8b5F4/Delegators`, {
+  const response = await axios.get(`https://api.idena.io/api/Pool/0x17b851A11f7d37054928BEf47F0F22166d433917/Delegators`, {
     params: {
       limit: this.limit,
       continuationToken: this.continuationToken,
@@ -327,20 +358,47 @@ export default {
   if (response.data.continuationToken) {
     this.continuationToken = response.data.continuationToken;
   } else {
-    this.allDataFetched = true;
+    this.allDelegatorsFetched = true;
   }
   this.dataLoaded = true;
 },
   async fetchTotalDelegators() {
-    const response = await axios.get(`https://api.idena.io/api/Pool/0xd8a938bbFeB263dD00c7559271eCcd089fb8b5F4/Delegators/Count`);
+    const response = await axios.get(`https://api.idena.io/api/Pool/0x17b851A11f7d37054928BEf47F0F22166d433917/Delegators/Count`);
     this.totalDelegators = response.data.result;
     console.log(response.data.result);
   },
-  fetchMore() {
-    if (!this.allDataFetched) {
+  fetchMoreDelegators() {
+    if (!this.allDelegatorsFetched) {
       this.fetchDelegators();
     }
   },
+  fetchMoreTransactions() {
+    if (!this.allTransactionsFetched) {
+      this.fetchTransactions();
+    }
+  },
+  async fetchTransactions() {
+    const response = await axios.get(`https://api.idena.io/api/Address/0x344a09ec5b9b5debc5a889837c50c66c8a78f04d/Txs`, {
+    params: {
+      limit: this.limit,
+      continuationToken: this.continuationToken,
+    },
+  });
+      const transactions = response.data.result
+      console.log(transactions);
+
+      this.transactions = [...this.transactions, ...transactions];
+      console.log(transactions);
+      if (response.data.continuationToken) {
+    this.continuationToken = response.data.continuationToken;
+  } else {
+    this.allTransactionsFetched = true;
+  }
+  this.dataLoaded = true;
+      // this.canFetchMore = !!response.continuationToken;
+    },
+
+  
   }
 }
 </script>
@@ -510,14 +568,15 @@ button:disabled {
   --t: 1px;  /* the thickness of the border */
   --g: 20px; /* the gap between the border and image */
   
-  padding: calc(var(--g) + var(--t));
-  outline: var(--t) solid white; /* the color here */
+  /* padding: calc(var(--g) + var(--t));
+  outline: var(--t) solid white; 
   outline-offset: calc(-1*var(--t));
   mask:
     conic-gradient(at var(--s) var(--s),#0000 75%,#000 0)
     0 0/calc(100% - var(--s)) calc(100% - var(--s)),
-    linear-gradient(#000 0 0) content-box;
+    linear-gradient(#000 0 0) content-box; */
   /* transition: .4s; */
+
 }
 #prediction{
   height: 40%;
