@@ -1,24 +1,19 @@
-
 <template>
   <div id="wrapper">
-    <div id ="prediction">
-    <div id ="title">
-      <h3> REWARDS CALCULATION</h3>
-    </div>
-    <div id ="stakeApy">
-      <div>
-        Stake, iDNA
+    <div id="prediction">
+      <div id="title">
+        <h3>REWARDS CALCULATION</h3>
       </div>
-      <div>
-        APY, %
+      <div id="stakeApy">
+        <div>Stake, iDNA</div>
+        <div>APY, %</div>
       </div>
-    </div>
-    <div id="values">
-      <div>
-        {{ amountValue }}
-      </div>
-      <div>
-        {{parseFloat(
+      <div id="values">
+        <div>
+          {{ amountValue }}
+        </div>
+        <div>
+          {{parseFloat(
           (
             (
               (
@@ -30,29 +25,46 @@
             ) * 366
           ) / epochTime.epochDuration * 0.9 
         ).toFixed(2)}}
+        </div>
+      </div>
+      <div id="calculation">
+        <!-- 90% of the rewards are distributed to the delegators. The remaining 10% are distributed to the pool owner. -->
+        <div class="rewards">
+          <div>Mining reward:</div>
+          <div>
+            {{parseFloat(calcMiningReward(amountValue) * 0.9).toFixed(2)}} iDNA
+          </div>
+        </div>
+        <div class="rewards">
+          <div>Validation reward:</div>
+          <div>
+            {{parseFloat(calcStakingReward(amountValue) * 0.9).toFixed(2)}} iDNA
+          </div>
+        </div>
+        <div class="rewards">
+          <div>Extra flip reward:</div>
+          <div>
+            {{parseFloat(calcExtraFlipReward(amountValue) * 0.9).toFixed(2)}}
+            iDNA
+          </div>
+        </div>
+        <div class="rewards">
+          <div>Invitation reward:</div>
+          <div>
+            {{parseFloat(calcInvitationReward(amountValue) * 0.9).toFixed(2)}}
+            iDNA
+          </div>
+        </div>
+        <hr />
+        <div class="rewards" id="total">
+          <div>Total epoch reward:</div>
+          <div>
+            {{parseFloat((calcMiningReward(amountValue)+calcStakingReward(amountValue)+calcExtraFlipReward(amountValue)+calcInvitationReward(amountValue))*0.9 ).toFixed(2)}}
+            iDNA
+          </div>
+        </div>
       </div>
     </div>
-    <div id="calculation"> 
-      <!-- 90% of the rewards are distributed to the delegators. The remaining 10% are distributed to the pool owner. -->
-      <div class="rewards">
-      <div>Mining reward: </div> <div>{{parseFloat(calcMiningReward(amountValue) * 0.9).toFixed(2)}} iDNA</div>
-      </div>
-      <div class="rewards">
-      <div>Validation reward:</div> <div>{{parseFloat(calcStakingReward(amountValue) * 0.9).toFixed(2)}} iDNA</div>
-      </div>
-      <div class="rewards">
-      <div>Extra flip reward: </div> <div>{{parseFloat(calcExtraFlipReward(amountValue) * 0.9).toFixed(2)}} iDNA </div>
-      </div>
-      <div class="rewards">
-      <div>Invitation reward:</div> <div>{{parseFloat(calcInvitationReward(amountValue) * 0.9).toFixed(2)}} iDNA</div>
-      </div>
-      <hr/>
-      <div class="rewards" id="total">
-      <div>Total epoch reward: </div> <div>{{parseFloat((calcMiningReward(amountValue)+calcStakingReward(amountValue)+calcExtraFlipReward(amountValue)+calcInvitationReward(amountValue))*0.9 ).toFixed(2)}} iDNA</div>
-      </div>
-
-  </div>
-</div>
     <!-- <div id="countdown">
       <span id="clock">{{ countdown }}</span>
     </div> -->
@@ -91,83 +103,124 @@
       <span>Delegate your identity only to a trusted pool.</span>
     </div>
   </div> -->
-  <div class="container">
-
-  <ul class="nav nav-tabs">
-    <li class="active"><a data-toggle="tab" href="#home">Pool's delegators: {{ totalDelegators }}</a></li>
-    <li><a data-toggle="tab" href="#menu1">Receive history from idenanode.com</a></li>
-    <!-- <li><a data-toggle="tab" href="#menu2">Menu 2</a></li>
+    <div class="container">
+      <ul class="nav nav-tabs">
+        <li class="active">
+          <a data-toggle="tab" href="#home"
+            >Pool's delegators: {{ totalDelegators }}</a
+          >
+        </li>
+        <li>
+          <a data-toggle="tab" href="#menu1"
+            >Receive history from idenanode.com</a
+          >
+        </li>
+        <!-- <li><a data-toggle="tab" href="#menu2">Menu 2</a></li>
     <li><a data-toggle="tab" href="#menu3">Menu 3</a></li> -->
-  </ul>
+      </ul>
 
-  <div class="tab-content" style="height: 40vh; overflow-y: auto;">
-    <div id="home" class="tab-pane fade in active">
-      <div class="table-responsive">
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Address</th>
-          <th>Stake, iDNA</th>
-          <th>Status</th>
-          <th>Age</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="delegator in delegators" :key="delegator.address" >
-          <td>
-            <div id = "user">
-            <div class="user-pic">
-              <img :src="delegator.address ? `https://robohash.idena.io/${delegator.address.toLowerCase()}` : ''" alt="pic" width="32" />            </div>
-            <div class="text_block text_block--ellipsis">
-              <a :href="`https://scan.idena.io/address/${delegator.address}`" target="_blank" @click="$event.target.blur()">
-  {{ delegator.address }}
-</a>            </div>
+      <div class="tab-content" style="height: 40vh; overflow-y: auto">
+        <div id="home" class="tab-pane fade in active">
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Address</th>
+                  <th>Stake, iDNA</th>
+                  <th>Status</th>
+                  <th>Age</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="delegator in delegators" :key="delegator.address">
+                  <td>
+                    <div id="user">
+                      <div class="user-pic">
+                        <img
+                          :src="delegator.address ? `https://robohash.idena.io/${delegator.address.toLowerCase()}` : ''"
+                          alt="pic"
+                          width="32"
+                        />
+                      </div>
+                      <div class="text_block text_block--ellipsis">
+                        <a
+                          :href="`https://scan.idena.io/address/${delegator.address}`"
+                          target="_blank"
+                          @click="$event.target.blur()"
+                        >
+                          {{ delegator.address }}
+                        </a>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="rowElement">
+                    {{ parseFloat(delegator.stake).toFixed(2) }}
+                  </td>
+                  <td class="rowElement">{{ delegator.state }}</td>
+                  <td class="rowElement">{{ delegator.age }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="text-center">
+              <button
+                v-if="dataLoaded && !allDelegatorsFetched"
+                @click="fetchMoreDelegators"
+              >
+                Show More
+              </button>
+            </div>
           </div>
-          </td>
-          <td class="rowElement">{{ parseFloat(delegator.stake).toFixed(2) }}</td>
-          <td class="rowElement">{{ delegator.state }}</td>
-          <td class="rowElement">{{ delegator.age }}</td>
-        </tr>
-      </tbody>
-    </table>
-    <div class="text-center">
-      <button v-if="dataLoaded && !allDelegatorsFetched" @click="fetchMoreDelegators">Show More</button>
-       </div>
-  </div>
-    </div>
-    <!-- Second tab -->
-    <div id="menu1" class="tab-pane fade">
-      <div class="table-responsive">
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Transaction</th>
-          <!-- <th>From</th>
+        </div>
+        <!-- Second tab -->
+        <div id="menu1" class="tab-pane fade">
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Transaction</th>
+                  <!-- <th>From</th>
           <th>To</th> -->
-          <th>Amount, iDNA</th>
-          <th style="width: 220px;">Timestamp</th>
-          <!-- <th style="width: 100px;">Type</th> -->
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="transaction in transactions" :key="transaction.hash">
-          <td>
-            <div class="text_block text_block--ellipsis" style="width: 80px;">
-              <a :href="`https://scan.idena.io/transaction/${transaction.hash}`" target="_blank" @click="$event.target.blur()">{{ transaction.hash.substring(0, 8) + '...' }}</a>            </div>
-          </td>
-          <td class="rowElement">{{transaction.amount}}</td>
-          <td class="rowElement">{{new Date(transaction.timestamp)}}</td>
+                  <th>Amount, iDNA</th>
+                  <th style="width: 220px">Timestamp</th>
+                  <!-- <th style="width: 100px;">Type</th> -->
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="transaction in transactions" :key="transaction.hash">
+                  <td>
+                    <div
+                      class="text_block text_block--ellipsis"
+                      style="width: 80px"
+                    >
+                      <a
+                        :href="`https://scan.idena.io/transaction/${transaction.hash}`"
+                        target="_blank"
+                        @click="$event.target.blur()"
+                        >{{ transaction.hash.substring(0, 8) + '...' }}</a
+                      >
+                    </div>
+                  </td>
+                  <td class="rowElement">{{transaction.amount}}</td>
+                  <td class="rowElement">
+                    
+                    {{new Date(transaction.timestamp).toLocaleString()}}
+                  </td>
 
-          <!-- Similar for other columns... -->
-        </tr>
-      </tbody>
-    </table>
-    <div class="text-center" v-if="canFetchMore">
-      <button v-if="dataLoaded && !allTransactionsFetched" @click="fetchMoreTransactions">Show More</button>
-       </div>
-  </div>
-    </div>
-    <!-- <div id="menu2" class="tab-pane fade">
+                  <!-- Similar for other columns... -->
+                </tr>
+              </tbody>
+            </table>
+            <div class="text-center" v-if="canFetchMore">
+              <button
+                v-if="dataLoaded && !allTransactionsFetched"
+                @click="fetchMoreTransactions"
+              >
+                Show More
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- <div id="menu2" class="tab-pane fade">
       <h3>Menu 2</h3>
       <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam.</p>
     </div>
@@ -175,10 +228,9 @@
       <h3>Menu 3</h3>
       <p>Eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
     </div> -->
+      </div>
+    </div>
   </div>
-</div>
-</div>
-
 </template>
 <script>
 import axios from 'axios'
@@ -398,9 +450,10 @@ export default {
       // this.canFetchMore = !!response.continuationToken;
     },
 
-  
+
   }
 }
+
 </script>
 
 <style scoped>
@@ -416,8 +469,8 @@ export default {
   display: flex;
   height: 90vh;
   flex-direction: column;
-  font-family: 'Lexend Exa', sans-serif;
-  color:white
+  font-family: "Lexend Exa", sans-serif;
+  color: white;
 }
 
 #delegation {
@@ -534,40 +587,38 @@ button {
 
 #divider {
   width: 100%;
-  margin:2px;
+  margin: 2px;
 }
-.container{
-  margin-top:2rem;
+.container {
+  margin-top: 2rem;
   width: 100%;
   height: 40%;
   color: white;
 }
-#user{
+#user {
   display: flex;
   align-items: center;
-  
 }
-.rowElement{
+.rowElement {
   vertical-align: middle;
-  
 }
-th{
+th {
   font-weight: 600;
 }
 button:disabled {
   background-color: #cccccc;
   color: #666666;
 }
-.user-pic{
+.user-pic {
   margin-right: 10px;
   border-radius: 50%;
   background-color: white;
 }
-.tab-content{
+.tab-content {
   --s: 30px; /* the size on the corner */
-  --t: 1px;  /* the thickness of the border */
+  --t: 1px; /* the thickness of the border */
   --g: 20px; /* the gap between the border and image */
-  
+
   /* padding: calc(var(--g) + var(--t));
   outline: var(--t) solid white; 
   outline-offset: calc(-1*var(--t));
@@ -576,35 +627,34 @@ button:disabled {
     0 0/calc(100% - var(--s)) calc(100% - var(--s)),
     linear-gradient(#000 0 0) content-box; */
   /* transition: .4s; */
-
 }
-#prediction{
+#prediction {
   height: 40%;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
-#title{
-  display:flex;
+#title {
+  display: flex;
   justify-content: center;
   align-items: center;
   width: 100%;
   text-align: center;
 }
-#stakeApy, #values{
+#stakeApy,
+#values {
   width: 60%;
   display: flex;
   justify-content: space-between;
-  
 }
-#values{
+#values {
   font-size: 3rem;
   font-weight: 600;
 }
-#stakeApy{
-  color: grey
+#stakeApy {
+  color: grey;
 }
-#calculation{
+#calculation {
   display: flex;
   flex-direction: column;
   width: 50%;
@@ -612,15 +662,15 @@ button:disabled {
   justify-content: space-between;
 }
 
-.rewards{
+.rewards {
   display: flex;
   justify-content: space-between;
 }
-#total{
+#total {
   font-size: 1.75rem;
 }
 .nav-tabs {
-    border-bottom: none;
+  border-bottom: none;
 }
 a:hover {
   text-decoration: none;
@@ -628,6 +678,5 @@ a:hover {
 
 a:focus {
   text-decoration: none;
-
 }
 </style>
