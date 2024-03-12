@@ -32,6 +32,7 @@ import { Buffer } from "buffer";
       <nav>
         <RouterLink to="/">HOME</RouterLink>
         <RouterLink to ="/delegation">DELEGATION</RouterLink>
+        <RouterLink to ="/about">ABOUT</RouterLink>
       </nav>
       <Identity :identity="identity" @signOut="signOut" @signIn="signIn" />
   </header>
