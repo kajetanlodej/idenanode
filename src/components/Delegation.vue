@@ -13,7 +13,7 @@
           {{ amountValue }}
         </div>
         <div>
-          {{parseFloat(
+          {{amountValue? parseFloat(
           (
             (
               (
@@ -24,7 +24,7 @@
               ) * 100 / amountValue
             ) * 366
           ) / epochTime.epochDuration * 0.9 
-        ).toFixed(2)}}
+        ).toFixed(2): 0}}
         </div>
       </div>
       <div id="calculation">
@@ -107,7 +107,7 @@
       <ul class="nav nav-tabs">
         <li class="active">
           <a data-toggle="tab" href="#home"
-            >Pool's delegators: {{ totalDelegators }}</a
+            >Pool's delegators: {{ totalDelegators }} </a
           >
         </li>
         <li>
@@ -233,6 +233,7 @@
   </div>
 </template>
 <script>
+import { mapState } from 'vuex'
 import axios from 'axios'
 import 'bootstrap';
 export default {
@@ -259,10 +260,16 @@ export default {
       epochNum: null,
       epochTime: {},
       STAKING_POWER: 0.9,
-      amountValue: 100000, //change to take into account the amount of the user
+      //amountValue: 100000, //change to take into account the amount of the user
       transactions: [],
     }
   },
+  computed: {
+    ...mapState({
+      amountValue: (state) => state.stake
+    })
+  },
+
   mounted() {
     this.startCountdown()
     this.fetchDelegators()

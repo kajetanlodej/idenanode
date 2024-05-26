@@ -75,6 +75,7 @@ import { Buffer } from "buffer";
   <RouterView />
 </template> -->
 <script>
+import { mapActions } from 'vuex';
 
 export default {
   name: "App",
@@ -160,6 +161,8 @@ export default {
       this.inft.minted = null;
       this.inft.tokensOwned = [];
       localStorage.removeItem("address");
+      this.updateStake(0);
+
     },
     sendGenerateTx: async function () {
       const args = [
@@ -270,11 +273,16 @@ export default {
         await new Promise((resolve) => setTimeout(resolve, 2000));
       }
     },
+    ...mapActions(['updateStake']),
     initAddress: async function () {
       console.log("initAddress");
       if (this.address) {
         console.log("address", this.address);
         this.identity = await this.conn.getIdentity(this.address);
+        this.stake = Number.parseFloat(this.identity.stake).toFixed(2);
+        console.log("stakes", this.stake);
+        this.updateStake(this.stake);
+
         // this.identity.state = "Human";
         // this.identity.address = this.address;
         this.inft.balance = await this.conn.getTokenBalance(this.address);
