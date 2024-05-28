@@ -28,13 +28,14 @@ import { Buffer } from "buffer";
 
 <template>
   <div id="wrapper">
-  <header>
+  <header >
       <nav>
-        <RouterLink to="/">HOME</RouterLink>
+        <RouterLink to="/">STATUS</RouterLink>
         <RouterLink to ="/delegation">DELEGATION</RouterLink>
         <RouterLink to ="/about">ABOUT</RouterLink>
       </nav>
       <Identity :identity="identity" @signOut="signOut" @signIn="signIn" />
+      
   </header>
   <RouterView/>
 </div>
@@ -527,11 +528,12 @@ export default {
   flex-direction: column;
 }
 
-header{
+header {
   width: 100%;
   height: 10%;
   display: flex;
   flex-direction: row;
+
 }
 
 nav{
@@ -540,8 +542,28 @@ nav{
   display: flex;
   align-items: center;
   justify-content: space-evenly;
+  
 }
 
+nav a {
+  transition: transform 0.15s linear;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: subpixel-antialiased;
+  will-change: transform;  
+  text-decoration: none;
+}
+nav a:hover {
+  color: #0866ff;
+
+}
+nav a.router-link-exact-active {
+  color: #0866ff;
+  -webkit-transform: scale(1.1) translate3d( 0, 0, 0) perspective(1px);
+     -moz-transform: scale(1.1) translate3d( 0, 0, 0) perspective(1px);
+       -o-transform: scale(1.1) translate3d( 0, 0, 0) perspective(1px);
+      -ms-transform: scale(1.1) translate3d( 0, 0, 0) perspective(1px);
+          transform: scale(1.1) translate3d( 0, 0, 0) perspective(1px);
+}
 /* body{
   display: flex;
   flex-direction: column;

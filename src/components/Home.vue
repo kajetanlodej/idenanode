@@ -16,10 +16,11 @@
       <span id="status-offline">Offline</span>
     </div>
   </div>
+
   <div id="globeContainer">
     <div id="globeViz"></div>
   </div>
-  <button class="btn btn-info" @click="handleRefreshClick">REFRESH</button>
+  <button class="button" type="button" @click="handleRefreshClick">REFRESH</button>
   <!-- <div class="outer-reload" id="outer-reload">
     <div id="outer-icon">
       <input id="reload" type="image" src="/content/refresh-white.png" alt="refresh-button">
@@ -28,14 +29,15 @@
       <span id="labelToggle">NODE STATUS</span>
     </div>
   </div> -->
-  <div id="sold-keys">
+
+
+  <!-- <div id="sold-keys">
     <span id="number-sold-text">API keys sold:&nbsp;</span>
     <div id="numberOfKeys">
       <span id="totalSold"> {{ transactionCount }} in total</span>
       <span id="thisEpochSold">{{ thisEpochTransactionCount }} this epoch</span>  
     </div>
-    <!-- <span id="number-sold-number"> {{ transactionCount }}</span> -->
-  </div>
+  </div> -->
 </div>
   </template>
   
@@ -87,6 +89,8 @@ html {
     width: 25px;
     border-radius: 50%;
     margin: 1.4vh;
+    border: 2px solid rgba(63,107,169, 0.5); /* Add a black border */
+
 }
 
 #dot-online {
@@ -95,10 +99,13 @@ html {
 
 #status-online {
     color: var(--online);
+    text-shadow: 2px 2px rgba(63,107,169, 0.5);
 }
 
 #status-synchronizing {
     color: var(--synchronizing);
+    text-shadow: 2px 2px rgba(63,107,169, 0.5);
+
 }
 
 #dot-synchronizing {
@@ -106,7 +113,8 @@ html {
 }
 
 #status-offline {
-    color: var(--offline)
+    color: var(--offline);
+    text-shadow: 2px 2px rgba(63,107,169, 0.5);
 }
 
 #dot-offline {
@@ -204,6 +212,7 @@ html {
         margin-bottom: 5px;
         margin-top: 2px;
         font-size: 1.4em;
+        
     }
 
     #labelToggle {
@@ -252,6 +261,50 @@ html {
         margin: 1.4vh;
     }
 
+}
+
+.button {
+  align-items: center;
+  background-color: #0A66C2;
+  border: 0;
+  box-sizing: border-box;
+  color: #ffffff;
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 16px;
+  font-weight: 300;
+  justify-content: center;
+  line-height: 20px;
+  max-width: 480px;
+  min-height: 40px;
+  min-width: 0px;
+  overflow: hidden;
+  padding: 0px;
+  padding-left: 20px;
+  padding-right: 20px;
+  text-align: center;
+  touch-action: manipulation;
+  transition: background-color 0.167s cubic-bezier(0.4, 0, 0.2, 1) 0s, box-shadow 0.167s cubic-bezier(0.4, 0, 0.2, 1) 0s, color 0.167s cubic-bezier(0.4, 0, 0.2, 1) 0s;
+  user-select: none;
+  -webkit-user-select: none;
+  vertical-align: middle;
+}
+
+.button:hover
+ { 
+  background-color: #09223b;
+  color: #ffffff;
+}
+
+.button:active {
+  background: #09223b;
+  color: rgb(255, 255, 255, .7);
+}
+
+.button:disabled { 
+  cursor: not-allowed;
+  background: rgba(0, 0, 0, .08);
+  color: rgba(0, 0, 0, .3);
 }
 </style>
 
@@ -347,7 +400,8 @@ export default {
             altitude: 0.059,
             dotradius: 1.2,
             size: 1.2,
-            color: '#0000001' // Set the color to black (#000000) for the first label
+            color: '#0000001', // Set the color to black (#000000) for the first label
+            desc: 'Shared  node'
           },
           { //Background
             lat: 51.2,
@@ -356,7 +410,9 @@ export default {
             altitude: 0.06,
             dotradius: 1.2,
             size: 1.25,
-            color: '#000000'
+            color: '#000000',
+            desc: 'Shared  node'
+
           },
           { 
             lat: 52.5,
@@ -365,7 +421,8 @@ export default {
             altitude: 0.06,
             dotradius: 1.2,
             size: 1.2,
-            color: '#000000'
+            color: '#000000',
+            desc: 'Mining  node'
           }
         ]).labelLat(d => d.lat)
         .labelLng(d => d.lng)
@@ -374,8 +431,12 @@ export default {
         .labelDotRadius(d => d.dotradius)
         .labelAltitude(d => d.altitude) // Set label altitude from the data
         .labelColor(d => d.color)
-        .polygonStrokeColor(() => '#FFF')
-        .backgroundColor('#010626');
+        .polygonStrokeColor(() => '#f0f2f5')
+        .labelLabel(d => `
+        <div><b>${d.desc}</b></div>
+
+      `)
+        .backgroundColor('#f0f2f5');
 
 
 
