@@ -100,7 +100,7 @@
     height: 100%;
     width: 100%;
     box-shadow: #09223b 0px 0px 3px 0px;
-    border-radius: 50%;
+    border-radius: 10%;
     background-color: #f0f2f5;
   }
   

@@ -65,6 +65,20 @@
         </div>
       </div>
     </div>
+    <div id="delegation">
+    <div id="title">
+        <h3>DELEGATION ADDRESS</h3>
+    </div>
+    <p>Delegate using official <a href="https://app.idena.io" target="_blank">Idena web app</a></p>
+    <div id ="address">
+      0x4AE59825651D492134fc67ED1DD459E4F006CF93
+    </div>
+    <a href="https://scan.idena.io/pool/0x4AE59825651D492134fc67ED1DD459E4F006CF93" target="_blank">Pool details</a>
+
+
+    </div>
+
+
     <!-- <div id="countdown">
       <span id="clock">{{ countdown }}</span>
     </div> -->
@@ -103,7 +117,11 @@
       <span>Delegate your identity only to a trusted pool.</span>
     </div>
   </div> -->
-    <div class="container">
+
+
+
+
+    <!-- <div class="container">
       <ul class="nav nav-tabs">
         <li class="active">
           <a data-toggle="tab" href="#home"
@@ -115,8 +133,7 @@
             >Receive history from idenanode.com</a
           >
         </li>
-        <!-- <li><a data-toggle="tab" href="#menu2">Menu 2</a></li>
-    <li><a data-toggle="tab" href="#menu3">Menu 3</a></li> -->
+
       </ul>
 
       <div class="tab-content" style="height: 40vh; overflow-y: auto">
@@ -171,18 +188,15 @@
             </div>
           </div>
         </div>
-        <!-- Second tab -->
         <div id="menu1" class="tab-pane fade">
           <div class="table-responsive">
             <table class="table">
               <thead>
                 <tr>
                   <th>Transaction</th>
-                  <!-- <th>From</th>
-          <th>To</th> -->
+
                   <th>Amount, iDNA</th>
                   <th style="width: 220px">Timestamp</th>
-                  <!-- <th style="width: 100px;">Type</th> -->
                 </tr>
               </thead>
               <tbody>
@@ -206,7 +220,6 @@
                     {{new Date(transaction.timestamp).toLocaleString()}}
                   </td>
 
-                  <!-- Similar for other columns... -->
                 </tr>
               </tbody>
             </table>
@@ -220,16 +233,11 @@
             </div>
           </div>
         </div>
-        <!-- <div id="menu2" class="tab-pane fade">
-      <h3>Menu 2</h3>
-      <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam.</p>
-    </div>
-    <div id="menu3" class="tab-pane fade">
-      <h3>Menu 3</h3>
-      <p>Eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
-    </div> -->
+
       </div>
-    </div>
+    </div> -->
+
+
   </div>
 </template>
 <script>
@@ -474,20 +482,23 @@ export default {
 
 #wrapper {
   display: flex;
+  justify-content: center;  
   height: 90vh;
   flex-direction: column;
   font-family: "Lexend Exa", sans-serif;
-  color: white;
+  color: #131313;
+  justify-content: center;
 }
 
 #delegation {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   font-size: 1.5rem;
-  margin-top: 2rem;
+  height: 30vh;
   font-weight: 600;
-  color: white;
+  color: #131313;
 }
 
 #countdown {
@@ -679,11 +690,23 @@ button:disabled {
 .nav-tabs {
   border-bottom: none;
 }
-a:hover {
+a {
+  color: #0866ff;
   text-decoration: none;
+  transition: color 0.3s ease;
 }
 
-a:focus {
-  text-decoration: none;
+a:hover {
+  color: #0056b3; 
+}
+
+a:active {
+  color: #011531; /* Change the link color when it's active */
+}
+#address {
+  margin-bottom: 10px;
+  font-size: 2rem;
+  font-weight: 500;
+
 }
 </style>
