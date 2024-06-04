@@ -414,16 +414,16 @@ export default {
             desc: 'Shared  node'
 
           },
-          { 
-            lat: 52.5,
-            lng: 19,
-            text: 'Poland',
-            altitude: 0.06,
-            dotradius: 1.2,
-            size: 1.2,
-            color: '#000000',
-            desc: 'Mining  node'
-          }
+          // { 
+          //   lat: 52.5,
+          //   lng: 19,
+          //   text: 'Poland',
+          //   altitude: 0.06,
+          //   dotradius: 1.2,
+          //   size: 1.2,
+          //   color: '#000000',
+          //   desc: 'Mining  node'
+          // }
         ]).labelLat(d => d.lat)
         .labelLng(d => d.lng)
         .labelText(d => d.text)

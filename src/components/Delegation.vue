@@ -66,18 +66,29 @@
       </div>
     </div>
     <div id="delegation">
+    
+    <!-- <p>Delegate using official <a href="https://app.idena.io" target="_blank">Idena web app</a></p> -->
     <div id="title">
         <h3>DELEGATION ADDRESS</h3>
     </div>
-    <p>Delegate using official <a href="https://app.idena.io" target="_blank">Idena web app</a></p>
     <div id ="address">
       0x4AE59825651D492134fc67ED1DD459E4F006CF93
     </div>
     <a href="https://scan.idena.io/pool/0x4AE59825651D492134fc67ED1DD459E4F006CF93" target="_blank">Pool details</a>
-
-
     </div>
 
+    <div id="countdowns">
+      <div id="titles">
+        <div>Mining rewards distribution in</div>
+        <div>Validation rewards distribution in</div>
+      </div>
+
+      <div id ="validation">
+        <span id="clock">{{countdown }}</span>
+        <span id="clock">{{ countdown1 }}</span>
+      </div>
+      
+    </div>  
 
     <!-- <div id="countdown">
       <span id="clock">{{ countdown }}</span>
@@ -247,7 +258,10 @@ import 'bootstrap';
 export default {
   data() {
     return {
-      countdown: '',
+      countdown: '00:00:00',
+      countdown1: '00:00:00:00',
+      countdownInterval: null,
+      validationTime: null,
       delegators: [],
       canFetchMore: true,
       continuationToken: null,
@@ -279,6 +293,7 @@ export default {
   },
 
   mounted() {
+    this.fetchValidationTime();
     this.startCountdown()
     this.fetchDelegators()
     this.fetchTotalDelegators();
@@ -359,30 +374,65 @@ export default {
     const myStakeWeight = amount ** this.STAKING_POWER;
     return this.calculateEstimatedMiningReward(myStakeWeight, this.averageMinerWeight, this.onlineSize, this.epochTime.epochDuration);
   },
-    startCountdown() {
-      const countdownInterval = setInterval(() => {
-        const now = new Date()
-        const tomorrow = new Date(now)
-        tomorrow.setDate(tomorrow.getDate() + 1)
-        tomorrow.setHours(8, 0, 0, 0) // 8:00 AM
 
-        // Convert to CET timezone
-        const cetOffset = -1 // CET is UTC+1
-        const cetTomorrow = new Date(tomorrow.getTime() + cetOffset * 60 * 60 * 1000)
-
-        let timeInSeconds = Math.floor((cetTomorrow - now) / 1000)
-
-        const hours = Math.floor(timeInSeconds / 3600)
-        const minutes = Math.floor((timeInSeconds % 3600) / 60)
-        const seconds = timeInSeconds % 60
-
-        this.countdown = `${this.formatTime(hours)}:${this.formatTime(minutes)}:${this.formatTime(seconds)}`
+    async fetchValidationTime() {
+      try {
+        const response = await axios.get('https://api.idena.io/api/Epoch/Last');
+        const validationTime = new Date(response.data.result.validationTime);
+        validationTime.setMinutes(validationTime.getMinutes() + 45);
+        this.validationTime = validationTime;
+        this.startValidationCountdown();
+      } catch (error) {
+        console.error('Error fetching validation time:', error);
+      }
+    },
+    startValidationCountdown() {
+      this.countdownInterval = setInterval(() => {
+        const now = new Date();
+        const timeDifference = this.validationTime - now;
+        let timeInSeconds = Math.floor(timeDifference / 1000);
 
         if (timeInSeconds <= 0) {
-          clearInterval(countdownInterval)
-          this.countdown = '00:00:00'
+          clearInterval(this.countdownInterval);
+          this.countdown1 = '00:00:00:00';
+          return;
         }
-      }, 1000)
+
+        const days = Math.floor(timeInSeconds / (3600 * 24));
+        const hours = Math.floor((timeInSeconds % (3600 * 24)) / 3600);
+        const minutes = Math.floor((timeInSeconds % 3600) / 60);
+        const seconds = timeInSeconds % 60;
+
+        this.countdown1 = `${this.formatTime(days)}:${this.formatTime(hours)}:${this.formatTime(minutes)}:${this.formatTime(seconds)}`;
+      }, 1000);
+    },
+  
+    startCountdown() {
+      this.countdownInterval = setInterval(() => {
+        const now = new Date();
+        const nowUTC = new Date(now.toISOString().slice(0, -1) + 'Z');
+        const nextSixAMUTC = new Date(nowUTC);
+
+        if (nowUTC.getUTCHours() >= 6) {
+          nextSixAMUTC.setUTCDate(nowUTC.getUTCDate() + 1);
+        }
+        nextSixAMUTC.setUTCHours(6, 0, 0, 0);
+
+        const timeDifference = nextSixAMUTC - nowUTC;
+        let timeInSeconds = Math.floor(timeDifference / 1000);
+
+        const hours = Math.floor(timeInSeconds / 3600);
+        const minutes = Math.floor((timeInSeconds % 3600) / 60);
+        const seconds = timeInSeconds % 60;
+
+        this.countdown = `${this.formatTime(hours)}:${this.formatTime(minutes)}:${this.formatTime(seconds)}`;
+
+        if (timeInSeconds <= 0) {
+          clearInterval(this.countdownInterval);
+          this.countdown = '00:00:00';
+          this.startCountdown(); // Restart the countdown for the next day
+        }
+      }, 1000);
     },
     formatTime(time) {
       return time.toString().padStart(2, '0')
@@ -523,9 +573,9 @@ export default {
 }
 
 #clock {
-  font-size: 4rem;
-  font-weight: 600;
-  color: white;
+  font-size: 3rem;
+  font-weight: 200;
+  color: #131313 ;
 }
 
 #delegationStatus {
@@ -596,7 +646,28 @@ button {
   justify-content: center;
 }
 
+#countdowns {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 2rem;
+}
+
 #validation {
+    width: 60%;
+
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+}
+#titles{
+  width: 60%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+#mining {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -704,8 +775,8 @@ a:active {
   color: #011531; /* Change the link color when it's active */
 }
 #address {
-  margin-bottom: 10px;
-  font-size: 2rem;
+  margin-bottom: 0px;
+  font-size: 1.9rem;
   font-weight: 500;
 
 }
