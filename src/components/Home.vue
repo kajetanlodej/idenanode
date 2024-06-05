@@ -345,7 +345,7 @@ export default {
       this.initGlobe();
       this.countTransactions();
       this.loadMapData();
-      this.loadFontData();
+      //this.loadFontData();
       // Initialize the globe after loading the data
       // this.initGlobe();
       // Other initialization logic
