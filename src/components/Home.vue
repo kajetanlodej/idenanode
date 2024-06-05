@@ -372,20 +372,20 @@ export default {
       this.world.labelsData([]);
       this.world.customLayerData([]);
     },
-    async loadFontData() {
-      return axios.get('/src/assets/font.json')
-        .then(response => {
-          // if (!response.ok) {
-          //   throw new Error('Network response was not ok');
-          // }
-          this.labelfont = response.data;
-          this.world.labelTypeFace(this.labelfont);
-        })
-        .catch(error => {
-          console.error('Error fetching labelfont:', error);
-          throw error;
-        });
-    },
+    // async loadFontData() {
+    //   return axios.get('/src/assets/font.json')
+    //     .then(response => {
+    //       // if (!response.ok) {
+    //       //   throw new Error('Network response was not ok');
+    //       // }
+    //       this.labelfont = response.data;
+    //       this.world.labelTypeFace(this.labelfont);
+    //     })
+    //     .catch(error => {
+    //       console.error('Error fetching labelfont:', error);
+    //       throw error;
+    //     });
+    // },
     loadMapData() {
       return axios.get('/src/assets/ne_110m_admin_0_countries.geojson')
         .then(res => {
