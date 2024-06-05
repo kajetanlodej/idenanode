@@ -325,8 +325,10 @@ html {
 </style>
 
 <script>
+// import { Globe } from 'globe.gl';
 import axios from 'axios';
-// import Globe from 'globe.gl';
+//import Globe from 'globe.gl';
+import Globe from 'globe.gl';
 
 export default {
   data() {
@@ -398,6 +400,7 @@ export default {
     initGlobe() {
       const width = document.documentElement.clientWidth * 0.65;
       const height = document.documentElement.clientHeight * 0.6;
+
       this.world = Globe({ animateIn: false, waitForGlobeReady: true })
         (document.getElementById('globeViz'))
         .width(width)
