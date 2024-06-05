@@ -306,6 +306,22 @@ html {
   background: rgba(0, 0, 0, .08);
   color: rgba(0, 0, 0, .3);
 }
+
+#hoverStats{
+  font-family: 'Lexend Exa', sans-serif;
+  background-color: #f0f2f5;
+  padding-right:10px;
+  padding-left:10px;
+  color:#131313;
+}
+
+#hoverTitle{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
 </style>
 
 <script>
@@ -433,8 +449,15 @@ export default {
         .labelColor(d => d.color)
         .polygonStrokeColor(() => '#f0f2f5')
         .labelLabel(d => `
-        <div><b>${d.desc}</b></div>
-
+        <div id="hoverStats">
+        <div id="hoverTitle"><b>${d.desc}</b></div>
+        <div id="numberOfKeys">
+          API keys sold:
+        <span id="totalSold"> ${this.transactionCount} in total</span>
+        <span id="thisEpochSold">${this.thisEpochTransactionCount} this epoch</span>  
+    </div>
+        
+        </div>
       `)
         .backgroundColor('#f0f2f5');
 

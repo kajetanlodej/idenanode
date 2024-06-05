@@ -79,8 +79,8 @@
 
     <div id="countdowns">
       <div id="titles">
-        <div>Mining rewards distribution in</div>
-        <div>Validation rewards distribution in</div>
+        <div id="left">Mining rewards distribution in</div>
+        <div id="right">Validation rewards distribution in</div>
       </div>
 
       <div id ="validation">
@@ -654,8 +654,7 @@ button {
 }
 
 #validation {
-    width: 60%;
-
+  width: 60%;
   display: flex;
   justify-content: space-between;
   flex-direction: row;
@@ -663,8 +662,9 @@ button {
 #titles{
   width: 60%;
   display: flex;
-  flex-direction: row;
   justify-content: space-between;
+  flex-direction: row;
+
 }
 
 #mining {
@@ -779,5 +779,12 @@ a:active {
   font-size: 1.9rem;
   font-weight: 500;
 
+}
+
+#left{
+  text-align: left;
+}
+#right{
+  text-align: right;
 }
 </style>
