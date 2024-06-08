@@ -345,7 +345,7 @@ export default {
       this.initGlobe();
       this.countTransactions();
       this.loadMapData();
-      //this.loadFontData();
+      // this.loadFontData();
       // Initialize the globe after loading the data
       // this.initGlobe();
       // Other initialization logic
@@ -405,7 +405,7 @@ export default {
         (document.getElementById('globeViz'))
         .width(width)
         .height(height)
-        .globeImageUrl('//unpkg.com/three-globe/example/img/earth-dark.jpg')
+        .globeImageUrl('/src/assets/pobrane-jasne.png')
         .pointOfView({ lat: 51, lng: 9, altitude: 1.6 }) // aim at Germany
         .polygonAltitude(0.05)
         .polygonCapColor(() => '#056CF2')
