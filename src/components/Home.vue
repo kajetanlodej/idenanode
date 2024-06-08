@@ -326,6 +326,7 @@ import axios from 'axios';
 //import Globe from 'globe.gl';
 import Globe from 'globe.gl';
 import * as THREE from '//unpkg.com/three/build/three.module.js';
+import texture from '/src/assets/pobrane-jasne.png';
 
 export default {
   data() {
@@ -402,7 +403,7 @@ export default {
         (document.getElementById('globeViz'))
         .width(width)
         .height(height)
-         .globeImageUrl('/src/assets/pobrane-jasne.png')
+         .globeImageUrl(texture)
          //.globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
         .pointOfView({ lat: 51, lng: 9, altitude: 1.6 }) // aim at Germany
         // .polygonAltitude(0.05)
