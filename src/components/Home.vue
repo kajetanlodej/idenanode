@@ -89,7 +89,6 @@ html {
     width: 25px;
     border-radius: 50%;
     margin: 1.4vh;
-    border: 2px solid rgba(63,107,169, 0.5); /* Add a black border */
 
 }
 
@@ -99,12 +98,10 @@ html {
 
 #status-online {
     color: var(--online);
-    text-shadow: 2px 2px rgba(63,107,169, 0.5);
 }
 
 #status-synchronizing {
     color: var(--synchronizing);
-    text-shadow: 2px 2px rgba(63,107,169, 0.5);
 
 }
 
@@ -114,7 +111,6 @@ html {
 
 #status-offline {
     color: var(--offline);
-    text-shadow: 2px 2px rgba(63,107,169, 0.5);
 }
 
 #dot-offline {
@@ -329,6 +325,7 @@ html {
 import axios from 'axios';
 //import Globe from 'globe.gl';
 import Globe from 'globe.gl';
+import * as THREE from '//unpkg.com/three/build/three.module.js';
 
 export default {
   data() {
@@ -344,7 +341,7 @@ export default {
   mounted() {
       this.initGlobe();
       this.countTransactions();
-      this.loadMapData();
+      // this.loadMapData();
       // this.loadFontData();
       // Initialize the globe after loading the data
       // this.initGlobe();
@@ -386,17 +383,17 @@ export default {
     //       throw error;
     //     });
     // },
-    loadMapData() {
-      return axios.get('/src/assets/ne_110m_admin_0_countries.geojson')
-        .then(res => {
-          const countries = res.data;
-          this.world.polygonsData(countries.features);
-        })
-        .catch(error => {
-          console.error('Error fetching map data:', error);
-          throw error;
-        });
-    },
+    // loadMapData() {
+    //   return axios.get('/src/assets/ne_110m_admin_0_countries.geojson')
+    //     .then(res => {
+    //       const countries = res.data;
+    //       this.world.polygonsData(countries.features);
+    //     })
+    //     .catch(error => {
+    //       console.error('Error fetching map data:', error);
+    //       throw error;
+    //     });
+    // },
     initGlobe() {
       const width = document.documentElement.clientWidth * 0.65;
       const height = document.documentElement.clientHeight * 0.6;
@@ -405,12 +402,13 @@ export default {
         (document.getElementById('globeViz'))
         .width(width)
         .height(height)
-        .globeImageUrl('/src/assets/pobrane-jasne.png')
+         .globeImageUrl('/src/assets/pobrane-jasne.png')
+         //.globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
         .pointOfView({ lat: 51, lng: 9, altitude: 1.6 }) // aim at Germany
-        .polygonAltitude(0.05)
-        .polygonCapColor(() => '#056CF2')
-        .polygonSideColor(() => 'rgba(0, 0, 0, 0)')
-        .polygonCapCurvatureResolution(5)
+        // .polygonAltitude(0.05)
+        // .polygonCapColor(() => '#056CF2')
+        // .polygonSideColor(() => 'rgba(0, 0, 0, 0)')
+        // .polygonCapCurvatureResolution(5)
         .labelsData([
           {
             lat: 51,
@@ -450,7 +448,7 @@ export default {
         .labelDotRadius(d => d.dotradius)
         .labelAltitude(d => d.altitude) // Set label altitude from the data
         .labelColor(d => d.color)
-        .polygonStrokeColor(() => '#f0f2f5')
+        // .polygonStrokeColor(() => '#f0f2f5')
         .labelLabel(d => `
         <div id="hoverStats">
         <div id="hoverTitle"><b>${d.desc}</b></div>
@@ -463,6 +461,14 @@ export default {
         </div>
       `)
         .backgroundColor('#f0f2f5');
+
+    //   const globeMaterial = this.world.globeMaterial();
+    //   globeMaterial.bumpScale = 10;
+    //   new THREE.TextureLoader().load('/src/assets/pobrane-jasne.png', texture => {
+    //   globeMaterial.specularMap = texture;
+    //   globeMaterial.specular = new THREE.Color('grey');
+    //   globeMaterial.shininess = 15;
+    // });
 
 
 
