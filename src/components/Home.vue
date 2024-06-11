@@ -486,8 +486,7 @@ export default {
       //   .catch(error => {
       //     console.error('Error fetching labelfont:', error);
       //   });  
-      import ('/src/assets/simplifiedmap.geojson')
-      .then
+
       fetch('/src/assets/simplifiedmap.geojson')
         .then(res => res.json())
         .then(countries => {
