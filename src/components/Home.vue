@@ -325,7 +325,6 @@ html {
 import axios from 'axios';
 //import Globe from 'globe.gl';
 import Globe from 'globe.gl';
-import * as THREE from '//unpkg.com/three/build/three.module.js';
 import texture from '/src/assets/pobrane-jasne.png';
 
 export default {
@@ -406,10 +405,10 @@ export default {
          .globeImageUrl(texture)
          //.globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
         .pointOfView({ lat: 51, lng: 9, altitude: 1.6 }) // aim at Germany
-        // .polygonAltitude(0.05)
-        // .polygonCapColor(() => '#056CF2')
-        // .polygonSideColor(() => 'rgba(0, 0, 0, 0)')
-        // .polygonCapCurvatureResolution(5)
+        .polygonAltitude(0.05)
+        .polygonCapColor(() => '#056CF2')
+        .polygonSideColor(() => 'rgba(0, 0, 0, 0)')
+        .polygonCapCurvatureResolution(5)
         .labelsData([
           {
             lat: 51,
@@ -449,7 +448,7 @@ export default {
         .labelDotRadius(d => d.dotradius)
         .labelAltitude(d => d.altitude) // Set label altitude from the data
         .labelColor(d => d.color)
-        // .polygonStrokeColor(() => '#f0f2f5')
+        .polygonStrokeColor(() => '#f0f2f5')
         .labelLabel(d => `
         <div id="hoverStats">
         <div id="hoverTitle"><b>${d.desc}</b></div>
@@ -486,16 +485,18 @@ export default {
       //   })
       //   .catch(error => {
       //     console.error('Error fetching labelfont:', error);
-      //   });
-
-      // fetch('/src/assets/simplifiedmap.geojson')
-      //   .then(res => res.json())
-      //   .then(countries => {
-      //     this.world.polygonsData(countries.features);
-      //   })
-      //   .catch(error => {
-      //     console.error('Error fetching map data:', error);
-      //   });
+      //   });  
+      import ('/src/assets/simplifiedmap.geojson')
+      .then
+      fetch('/src/assets/simplifiedmap.geojson')
+        .then(res => res.json())
+        .then(countries => {
+          this.world.polygonsData(countries.features);
+        })
+        .catch(error => {
+          console.error('Error fetching map data:', error);
+        });
+        
     },
     // loadFontData() {
     //   axios.get('/src/assets/font.json')
