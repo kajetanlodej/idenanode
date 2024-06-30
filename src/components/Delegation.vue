@@ -69,26 +69,30 @@
     
     <!-- <p>Delegate using official <a href="https://app.idena.io" target="_blank">Idena web app</a></p> -->
     <!-- <button class="button" type="button" @click="delegate">DELEGATE</button> -->
-        <button 
+     <div class="spinner-border text-primary" role="status">
+  <span class="visually-hidden">Loading...</span>
+</div>
+
+    <button 
       class="button" 
       type="button" 
-      v-if="!isMyPoolDelegatee" 
-      @click="emitSendDelegateTx"
+      v-if="loggedAddress !== null && !isMyPoolDelegatee" 
+      @click="sendDelegateTx"
     >
       DELEGATE
     </button>
     <button 
       class="button" 
       type="button" 
-      v-else-if="delegatee !== null && isMyPoolDelegatee" 
-      @click="emitSendUnDelegateTx"
+      v-else-if="loggedAddress !== null && delegatee !== null && isMyPoolDelegatee" 
+      @click="sendUnDelegateTx"
     >
       UNDELEGATE
     </button>
     <button 
       class="button" 
       type="button"
-      v-else-if="delegatee === null"
+      v-else-if="loggedAddress === null"
       :disabled="delegatee === null" 
     >
       DELEGATE
@@ -279,7 +283,6 @@
   </div>
 </template>
 <script>
-import { EventBus } from '../eventBus.js'
 
 import { mapState } from 'vuex'
 import axios from 'axios'
@@ -288,13 +291,28 @@ import {
   POOL_ADDRESS,
 } from "../config.js";
 import 'bootstrap';
+import { Conn } from "../connection.js";
+import {
+  // ART_GENERATORS,
+  CALLBACK_URL,
+  NODE_URL,
+  NODE_KEY,
+  AUTH_WORKER_URL,
+} from "../config.js";
+import {
+  bufferToHex,
+  toBuffer,
+} from "ethereumjs-util";
+import { Buffer } from "buffer";
+import { BN } from "bn.js";
+import * as proto from "../proto/models_pb.js";
+
 export default {
-  props: {
-    sendDelegateTx: Function,
-    sendUnDelegateTx: Function,
-  },
   data() {
+      const conn = new Conn(this.connected, NODE_URL, NODE_KEY);
+
     return {
+      conn,
       countdown: '00:00:00',
       countdown1: '00:00:00:00',
       countdownInterval: null,
@@ -326,7 +344,9 @@ export default {
   computed: {
     ...mapState({
       amountValue: (state) => state.stake,
-      delegatee: (state) => state.delegatee
+      delegatee: (state) => state.delegatee,
+      loggedAddress: (state) => state.loggedAddress
+
     }),
     isMyPoolDelegatee() {
       console.log("1 i 2",this.delegatee, POOL_ADDRESS);
@@ -345,11 +365,80 @@ export default {
 
   },
   methods: {
-    emitSendDelegateTx() {
-      EventBus.$emit('sendDelegateTx');
+       sendDelegateTx: async function () {
+    const argsArray = [
+      {
+        index: 0,
+        format: "hex",
+        value: this.loggedAddress, // Assuming the sender's address needs to be included
+      },
+    ];
+    // console.log(this.loggedAddress,"ADDDDDDDD");
+    await this.buildTx("delegate", argsArray, 0x12);
+},
+    sendUnDelegateTx: async function () {
+        const argsArray = [
+          {
+            index: 0,
+            format: "hex",
+            value: this.loggedAddress, // Assuming the sender's address needs to be included
+          },
+        ];
+        // console.log(this.loggedAddress,"ADDDDDDDD");
+        await this.buildTx("delegate", argsArray, 0x13);
     },
-    emitSendUnDelegateTx() {
-      EventBus.$emit('sendUnDelegateTx');
+  buildTx: async function (method, args, TxType, amountInt = 0) {
+      const windowFeatures = "left=100,top=100,width=400,height=700";
+      var popup = window.open("", "_blank",windowFeatures);
+      this.generating = true;
+      console.log(method, args);
+      try {
+        // const nonce = this.addressNonce + 1;
+        // console.log("nonce", nonce);
+        const maxFeeInt = 1e18;
+        console.log("maxFeeInt", maxFeeInt);
+        const maxFee = new BN(maxFeeInt.toString());
+        // const payload = proto.encodeProtoCallContractAttachment({
+        //   method,
+        //   args: argsToSlice(args),
+        // });
+        // console.log(payload);
+        // console.log(bufferToHex(payload));
+        const amount = new BN(`${amountInt}000000000000000000`);
+        const amountBytes = toBuffer(amount);
+        const maxFeeBytes = toBuffer(maxFee);
+        console.log("amount", amount.toString(), amountBytes);
+        console.log("maxFee", maxFee.toString(), maxFeeBytes);
+        const addre = "0x71eecdf6414eda0be975c2b748a74ca5018460e4"; //TODO: change to the address of the pool
+        this.epoch = (await this.conn.getEpoch()).epoch;
+        this.nonce = (await this.conn.getBalance(this.loggedAddress)).nonce + 1;
+        console.log("nonce", this.nonce);
+        console.log("lolz",this.epoch);
+        const tx = proto.encodeProtoTransaction({
+          data: {
+            type: TxType,
+            to: toBuffer(addre),
+            amount: amountBytes,
+            maxFee: maxFeeBytes,
+            nonce: this.nonce,
+            epoch: this.epoch,
+            // payload: payload,
+          },
+        });
+        const serialized = bufferToHex(tx);
+        console.log("serialized", serialized);
+        const page_url =
+          location.protocol + "//" + location.host + location.pathname;
+        const callback_url = encodeURIComponent(page_url);
+        console.log("callback", callback_url);
+        const url = `https://app.idena.io/dna/raw?tx=${serialized}
+        &callback_url=${callback_url}?method=${method}`;
+        popup.location = url;
+      } catch (e) {
+        popup.close();
+        console.error(e);
+      }
+      this.generating = false;
     },
     async getData() {
       try {

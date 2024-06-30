@@ -31,7 +31,7 @@ import * as proto from "./proto/models_pb.js";
 <template>
   <div id="wrapper">
   <header >
-  <button @click="sendDelegateTx">Sign Out</button>
+  <!-- <button @click="sendDelegateTx">Sign Out</button> -->
       <nav>
         <RouterLink to="/">STATUS</RouterLink>
         <RouterLink to ="/delegation">DELEGATION</RouterLink>
@@ -171,7 +171,7 @@ export default {
       this.delegatee = null;
       this.updateStake(0);
       this.updateDelegatee(null);
-
+      this.updateLoggedAddress(null);
     },
     sendGenerateTx: async function () {
       const args = [
@@ -316,12 +316,14 @@ export default {
         await new Promise((resolve) => setTimeout(resolve, 2000));
       }
     },
-    ...mapActions(['updateStake', 'updateDelegatee']),
+    ...mapActions(['updateStake', 'updateDelegatee','updateLoggedAddress']),
     initAddress: async function () {
       console.log("initAddress");
       if (this.address) {
         console.log("address", this.address);
         this.identity = await this.conn.getIdentity(this.address);
+        this.updateLoggedAddress(this.address);
+        console.log(this.loggedAddress,"LOGGGGGGEDADDD");
         // localStorage.delegatee = this.identity.delegatee;
         // console.log("identitySTORAGEDELEGATEE", localStorage.delegatee);
         this.updateDelegatee(this.identity.delegatee);
