@@ -21,6 +21,8 @@ import {
   intToBuffer,
 } from "ethereumjs-util";
 import { Buffer } from "buffer";
+import { BN } from "bn.js";
+import * as proto from "./proto/models_pb.js";
 
 </script>
 
@@ -29,15 +31,18 @@ import { Buffer } from "buffer";
 <template>
   <div id="wrapper">
   <header >
+  <button @click="sendDelegateTx">Sign Out</button>
       <nav>
         <RouterLink to="/">STATUS</RouterLink>
         <RouterLink to ="/delegation">DELEGATION</RouterLink>
+        
         <RouterLink to ="/about">ABOUT</RouterLink>
       </nav>
       <Identity :identity="identity" @signOut="signOut" @signIn="signIn" />
-      
+
   </header>
   <RouterView/>
+  
 </div>
 
   <!-- <div id="wrapper">
@@ -80,6 +85,7 @@ import { mapActions } from 'vuex';
 
 export default {
   name: "App",
+
   components: {
     Identity,
     // iNFT,
@@ -162,7 +168,9 @@ export default {
       this.inft.minted = null;
       this.inft.tokensOwned = [];
       localStorage.removeItem("address");
+      this.delegatee = null;
       this.updateStake(0);
+      this.updateDelegatee(null);
 
     },
     sendGenerateTx: async function () {
@@ -220,38 +228,71 @@ export default {
       ];
       await this.buildTx("burn", argsArray);
     },
-    buildTx: async function (method, args) {
+    sendDelegateTx: async function () {
+    const argsArray = [
+      {
+        index: 0,
+        format: "hex",
+        value: this.address, // Assuming the sender's address needs to be included
+      },
+    ];
+    await this.buildTx("delegate", argsArray, 0x12);
+},
+    sendUnDelegateTx: async function () {
+        const argsArray = [
+          {
+            index: 0,
+            format: "hex",
+            value: this.address, // Assuming the sender's address needs to be included
+          },
+        ];
+        await this.buildTx("delegate", argsArray, 0x13);
+    },
+  buildTx: async function (method, args, TxType, amountInt = 0) {
       var popup = window.open("", "_blank");
       this.generating = true;
       console.log(method, args);
       try {
-        const balance = await this.conn.getBalance(this.address);
-        const nonce = balance.nonce + 1;
-        // const nonce = 1;
-        console.log(nonce, this.epoch);
-        const payload = proto.encodeProtoCallContractAttachment({
-          method,
-          args: argsToSlice(args),
-        });
-        console.log(payload);
-        console.log(bufferToHex(payload));
-        const maxFee = new BN("10000000000000000000");
+        // const nonce = this.addressNonce + 1;
+        // console.log("nonce", nonce);
+        const maxFeeInt = 1e18;
+        console.log("maxFeeInt", maxFeeInt);
+        const maxFee = new BN(maxFeeInt.toString());
+        // const payload = proto.encodeProtoCallContractAttachment({
+        //   method,
+        //   args: argsToSlice(args),
+        // });
+        // console.log(payload);
+        // console.log(bufferToHex(payload));
+        const amount = new BN(`${amountInt}000000000000000000`);
+        const amountBytes = toBuffer(amount);
         const maxFeeBytes = toBuffer(maxFee);
-
+        console.log("amount", amount.toString(), amountBytes);
+        console.log("maxFee", maxFee.toString(), maxFeeBytes);
+        const addre = "0x71eecdf6414eda0be975c2b748a74ca5018460e4";
+        this.epoch = (await this.conn.getEpoch()).epoch;
+        this.nonce = (await this.conn.getBalance(this.address)).nonce + 1;
+        console.log("nonce", this.nonce);
+        console.log("lolz",this.epoch);
         const tx = proto.encodeProtoTransaction({
           data: {
-            type: 16,
-            to: INFT_CONTRACT.buf,
+            type: TxType,
+            to: toBuffer(addre),
+            amount: amountBytes,
             maxFee: maxFeeBytes,
-            nonce: nonce,
+            nonce: this.nonce,
             epoch: this.epoch,
-            payload: payload,
+            // payload: payload,
           },
         });
         const serialized = bufferToHex(tx);
         console.log("serialized", serialized);
+        const page_url =
+          location.protocol + "//" + location.host + location.pathname;
+        const callback_url = encodeURIComponent(page_url);
+        console.log("callback", callback_url);
         const url = `https://app.idena.io/dna/raw?tx=${serialized}
-        &callback_url=${CALLBACK_URL}${method}`;
+        &callback_url=${callback_url}?method=${method}`;
         popup.location = url;
       } catch (e) {
         popup.close();
@@ -259,6 +300,7 @@ export default {
       }
       this.generating = false;
     },
+
     waitForReceipt: async function (hash) {
       this.waitingForReceipt = hash;
       while (true) {
@@ -274,16 +316,20 @@ export default {
         await new Promise((resolve) => setTimeout(resolve, 2000));
       }
     },
-    ...mapActions(['updateStake']),
+    ...mapActions(['updateStake', 'updateDelegatee']),
     initAddress: async function () {
       console.log("initAddress");
       if (this.address) {
         console.log("address", this.address);
         this.identity = await this.conn.getIdentity(this.address);
+        // localStorage.delegatee = this.identity.delegatee;
+        // console.log("identitySTORAGEDELEGATEE", localStorage.delegatee);
+        this.updateDelegatee(this.identity.delegatee);
+        
         this.stake = Number.parseFloat(this.identity.stake).toFixed(2);
         console.log("stakes", this.stake);
         this.updateStake(this.stake);
-
+        
         // this.identity.state = "Human";
         // this.identity.address = this.address;
         this.inft.balance = await this.conn.getTokenBalance(this.address);

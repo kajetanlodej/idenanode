@@ -19,6 +19,8 @@
     "buffer": "^6.0.3",
     "ethereumjs-util": "^7.1.5",
     "globe.gl": "^2.32.4",
+    "google-protobuf": "^3.21.2",
+    "js-sha3": "^0.9.3",
     "pinia": "^2.1.7",
     "vue": "^3.4.15",
     "vue-router": "^4.2.5",

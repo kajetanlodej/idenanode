@@ -68,12 +68,39 @@
     <div id="delegation">
     
     <!-- <p>Delegate using official <a href="https://app.idena.io" target="_blank">Idena web app</a></p> -->
-    <div id="title">
+    <!-- <button class="button" type="button" @click="delegate">DELEGATE</button> -->
+        <button 
+      class="button" 
+      type="button" 
+      v-if="!isMyPoolDelegatee" 
+      @click="emitSendDelegateTx"
+    >
+      DELEGATE
+    </button>
+    <button 
+      class="button" 
+      type="button" 
+      v-else-if="delegatee !== null && isMyPoolDelegatee" 
+      @click="emitSendUnDelegateTx"
+    >
+      UNDELEGATE
+    </button>
+    <button 
+      class="button" 
+      type="button"
+      v-else-if="delegatee === null"
+      :disabled="delegatee === null" 
+    >
+      DELEGATE
+    </button>
+    
+    <!-- <div id="title">
         <h3>DELEGATION ADDRESS</h3>
-    </div>
-    <div id ="address">
+        
+    </div> -->
+    <!-- <div id ="address">
       0x4AE59825651D492134fc67ED1DD459E4F006CF93
-    </div>
+    </div> -->
     <a href="https://scan.idena.io/pool/0x4AE59825651D492134fc67ED1DD459E4F006CF93" target="_blank">Pool details</a>
     </div>
 
@@ -252,10 +279,20 @@
   </div>
 </template>
 <script>
+import { EventBus } from '../eventBus.js'
+
 import { mapState } from 'vuex'
 import axios from 'axios'
+import {
+  // ART_GENERATORS,
+  POOL_ADDRESS,
+} from "../config.js";
 import 'bootstrap';
 export default {
+  props: {
+    sendDelegateTx: Function,
+    sendUnDelegateTx: Function,
+  },
   data() {
     return {
       countdown: '00:00:00',
@@ -288,8 +325,14 @@ export default {
   },
   computed: {
     ...mapState({
-      amountValue: (state) => state.stake
-    })
+      amountValue: (state) => state.stake,
+      delegatee: (state) => state.delegatee
+    }),
+    isMyPoolDelegatee() {
+      console.log("1 i 2",this.delegatee, POOL_ADDRESS);
+      console.log("rownasie",this.delegatee === POOL_ADDRESS)
+      return this.delegatee === POOL_ADDRESS;
+    }
   },
 
   mounted() {
@@ -302,6 +345,12 @@ export default {
 
   },
   methods: {
+    emitSendDelegateTx() {
+      EventBus.$emit('sendDelegateTx');
+    },
+    emitSendUnDelegateTx() {
+      EventBus.$emit('sendUnDelegateTx');
+    },
     async getData() {
       try {
         const coinsResponse = await axios.get('https://api.idena.io/api/coins');
@@ -598,19 +647,7 @@ export default {
   color: white;
 }
 
-button {
-  background-color: #4caf50;
-  border: none;
-  color: white;
-  padding: 15px 32px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-  margin: 4px 2px;
-  cursor: pointer;
-  border-radius: 12px;
-}
+
 
 #identityStats {
   width: 50%;
@@ -786,5 +823,48 @@ a:active {
 }
 #right{
   text-align: right;
+}
+.button {
+  align-items: center;
+  background-color: #0A66C2;
+  border: 0;
+  box-sizing: border-box;
+  color: #ffffff;
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 16px;
+  font-weight: 300;
+  justify-content: center;
+  line-height: 20px;
+  max-width: 480px;
+  min-height: 40px;
+  min-width: 0px;
+  overflow: hidden;
+  padding: 0px;
+  padding-left: 20px;
+  padding-right: 20px;
+  text-align: center;
+  touch-action: manipulation;
+  transition: background-color 0.167s cubic-bezier(0.4, 0, 0.2, 1) 0s, box-shadow 0.167s cubic-bezier(0.4, 0, 0.2, 1) 0s, color 0.167s cubic-bezier(0.4, 0, 0.2, 1) 0s;
+  user-select: none;
+  -webkit-user-select: none;
+  vertical-align: middle;
+}
+
+.button:hover
+ { 
+  background-color: #09223b;
+  color: #ffffff;
+}
+
+.button:active {
+  background: #09223b;
+  color: rgb(255, 255, 255, .7);
+}
+
+.button:disabled { 
+  cursor: not-allowed;
+  background: rgba(0, 0, 0, .08);
+  color: rgba(0, 0, 0, .3);
 }
 </style>
