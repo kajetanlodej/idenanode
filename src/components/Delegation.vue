@@ -13,18 +13,7 @@
           {{ amountValue }}
         </div>
         <div>
-          {{amountValue? parseFloat(
-          (
-            (
-              (
-                calcStakingReward(amountValue) +
-                calcMiningReward(amountValue) +
-                calcExtraFlipReward(amountValue) +
-                calcInvitationReward(amountValue)
-              ) * 100 / amountValue
-            ) * 366
-          ) / epochTime.epochDuration * 0.9 
-        ).toFixed(2): 0}}
+          {{amountValue? parseFloat(this.apy * 0.9).toFixed(2): 0}}
         </div>
       </div>
       <div id="calculation">
@@ -32,26 +21,26 @@
         <div class="rewards">
           <div>Mining reward:</div>
           <div>
-            {{parseFloat(calcMiningReward(amountValue) * 0.9).toFixed(2)}} iDNA
+            {{parseFloat(this.miningReward * 0.9).toFixed(2)}} iDNA
           </div>
         </div>
         <div class="rewards">
           <div>Validation reward:</div>
           <div>
-            {{parseFloat(calcStakingReward(amountValue) * 0.9).toFixed(2)}} iDNA
+            {{parseFloat(this.stakingReward * 0.9).toFixed(2)}} iDNA
           </div>
         </div>
         <div class="rewards">
           <div>Extra flip reward:</div>
           <div>
-            {{parseFloat(calcExtraFlipReward(amountValue) * 0.9).toFixed(2)}}
+            {{parseFloat(this.extraFlipReward * 0.9).toFixed(2)}}
             iDNA
           </div>
         </div>
         <div class="rewards">
           <div>Invitation reward:</div>
           <div>
-            {{parseFloat(calcInvitationReward(amountValue) * 0.9).toFixed(2)}}
+            {{parseFloat(this.invitationReward * 0.9).toFixed(2)}}
             iDNA
           </div>
         </div>
@@ -59,7 +48,7 @@
         <div class="rewards" id="total">
           <div>Total epoch reward:</div>
           <div>
-            {{parseFloat((calcMiningReward(amountValue)+calcStakingReward(amountValue)+calcExtraFlipReward(amountValue)+calcInvitationReward(amountValue))*0.9 ).toFixed(2)}}
+            {{parseFloat((this.miningReward+this.stakingReward+this.extraFlipReward+this.invitationReward) *0.9 ).toFixed(2)}}
             iDNA
           </div>
         </div>
@@ -115,8 +104,8 @@
       </div>
 
       <div id ="validation">
-        <span id="clock">{{countdown }}</span>
-        <span id="clock">{{ countdown1 }}</span>
+        <span id="clock">{{ this.miningCountdown }}</span>
+        <span id="clock">{{ this.validationCountdown }}</span>
       </div>
       
     </div>  
@@ -345,8 +334,14 @@ export default {
     ...mapState({
       amountValue: (state) => state.stake,
       delegatee: (state) => state.delegatee,
-      loggedAddress: (state) => state.loggedAddress
-
+      loggedAddress: (state) => state.loggedAddress,
+      miningReward: (state) => state.miningReward,
+      stakingReward: (state) => state.stakingReward,
+      extraFlipReward: (state) => state.extraFlipReward,
+      invitationReward: (state) => state.invitationReward,
+      apy: (state) => state.apy,
+      miningCountdown: (state) => state.miningDistributionCountdown,
+      validationCountdown: (state) => state.stakingDistributionCountdown
     }),
     isMyPoolDelegatee() {
       console.log("1 i 2",this.delegatee, POOL_ADDRESS);
@@ -388,6 +383,9 @@ export default {
         await this.buildTx("delegate", argsArray, 0x13);
     },
   buildTx: async function (method, args, TxType, amountInt = 0) {
+      console.log("MINING REWARD Z KOMPONENTU DELEGATION",this.miningReward);
+      console.log("APY Z KOMPONENETU DELEGATION",this.apy);
+      console.log("minign distribution countdown z delegation",this.miningCountdown);
       const windowFeatures = "left=100,top=100,width=400,height=700";
       var popup = window.open("", "_blank",windowFeatures);
       this.generating = true;
@@ -439,6 +437,7 @@ export default {
         console.error(e);
       }
       this.generating = false;
+
     },
     async getData() {
       try {
@@ -449,7 +448,6 @@ export default {
         const epochNumber = epochResponse.data.result.epoch - 1;
         const prevEpochResponse = await axios.get(`https://api.idena.io/api/epoch/${epochNumber}`);
         const rewardsResponse = await axios.get(`https://api.idena.io/api/epoch/${epochNumber}/rewardssummary`);
-
         const epochStart = new Date(prevEpochResponse.data.result.validationTime);
         const epochEnd = new Date(epochResponse.data.result.validationTime);
         const nowDate = new Date();

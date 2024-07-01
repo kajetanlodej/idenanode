@@ -23,6 +23,7 @@ import {
 import { Buffer } from "buffer";
 import { BN } from "bn.js";
 import * as proto from "./proto/models_pb.js";
+import axios from 'axios'
 
 </script>
 
@@ -112,6 +113,7 @@ export default {
         tokenPngs: {},
         recentlyMinted: [],
       },
+      STAKING_POWER: 0.9,
       waitingForReceipt: null,
     };
   },
@@ -172,6 +174,11 @@ export default {
       this.updateStake(0);
       this.updateDelegatee(null);
       this.updateLoggedAddress(null);
+      this.updateMiningReward(0);
+      this.updateApy(0);
+      this.updateStakingReward(0);
+      this.updateExtraFlipReward(0);
+      this.updateInvitationReward(0);
     },
     sendGenerateTx: async function () {
       const args = [
@@ -316,7 +323,7 @@ export default {
         await new Promise((resolve) => setTimeout(resolve, 2000));
       }
     },
-    ...mapActions(['updateStake', 'updateDelegatee','updateLoggedAddress']),
+    ...mapActions(['updateStake', 'updateDelegatee','updateLoggedAddress','updateMiningReward','updateStakingReward','updateExtraFlipReward','updateInvitationReward','updateApy','updateMiningDistributionCountdown','updateStakingDistributionCountdown']),
     initAddress: async function () {
       console.log("initAddress");
       if (this.address) {
@@ -331,7 +338,34 @@ export default {
         this.stake = Number.parseFloat(this.identity.stake).toFixed(2);
         console.log("stakes", this.stake);
         this.updateStake(this.stake);
-        
+        console.log("calling getData");
+        this.getData();
+        this.updateMiningReward(this.calcMiningReward(this.stake));
+        console.log("callingcalcMiningReward", this.calcMiningReward(this.stake));
+        this.updateStakingReward(this.calcStakingReward(this.stake));
+        this.updateExtraFlipReward(this.calcExtraFlipReward(this.stake));
+        this.updateInvitationReward(this.calcInvitationReward(this.stake));
+        this.updateApy((
+            (
+              (
+                this.calcMiningReward(this.stake) +
+                this.calcStakingReward(this.stake) +
+                this.calcExtraFlipReward(this.stake) +
+                this.calcInvitationReward(this.stake)
+              ) * 100 / this.stake
+            ) * 366
+          ) / this.epochTime.epochDuration);
+          console.log("apy z komponentu App.vue", ((
+            (
+              (
+                this.stakingReward +
+                this.miningReward +
+                this.extraFlipReward +
+                this.invitationReward
+              ) * 100 / this.stake
+            ) * 366
+          ) / this.epochTime.epochDuration));
+        // console.log("apy z komponentu App.vue", this.apy);
         // this.identity.state = "Human";
         // this.identity.address = this.address;
         this.inft.balance = await this.conn.getTokenBalance(this.address);
@@ -348,6 +382,70 @@ export default {
           this.inft.tokensOwned = [];
         }
       }
+    },
+        async fetchValidationTime() {
+      try {
+        const response = await axios.get('https://api.idena.io/api/Epoch/Last');
+        const validationTime = new Date(response.data.result.validationTime);
+        validationTime.setMinutes(validationTime.getMinutes() + 45);
+        this.validationTime = validationTime;
+        this.startValidationCountdown();
+      } catch (error) {
+        console.error('Error fetching validation time:', error);
+      }
+    },
+    startValidationCountdown() {
+      this.countdownInterval = setInterval(() => {
+        const now = new Date();
+        const timeDifference = this.validationTime - now;
+        let timeInSeconds = Math.floor(timeDifference / 1000);
+
+        if (timeInSeconds <= 0) {
+          clearInterval(this.countdownInterval);
+          this.countdown1 = '00:00:00:00';
+          return;
+        }
+
+        const days = Math.floor(timeInSeconds / (3600 * 24));
+        const hours = Math.floor((timeInSeconds % (3600 * 24)) / 3600);
+        const minutes = Math.floor((timeInSeconds % 3600) / 60);
+        const seconds = timeInSeconds % 60;
+
+        this.countdown1 = `${this.formatTime(days)}:${this.formatTime(hours)}:${this.formatTime(minutes)}:${this.formatTime(seconds)}`;
+      }, 1000);
+        this.updateStakingDistributionCountdown(this.countdown1);
+    },
+  
+    startCountdown() {
+      this.countdownInterval = setInterval(() => {
+        const now = new Date();
+        const nowUTC = new Date(now.toISOString().slice(0, -1) + 'Z');
+        const nextSixAMUTC = new Date(nowUTC);
+
+        if (nowUTC.getUTCHours() >= 6) {
+          nextSixAMUTC.setUTCDate(nowUTC.getUTCDate() + 1);
+        }
+        nextSixAMUTC.setUTCHours(6, 0, 0, 0);
+
+        const timeDifference = nextSixAMUTC - nowUTC;
+        let timeInSeconds = Math.floor(timeDifference / 1000);
+
+        const hours = Math.floor(timeInSeconds / 3600);
+        const minutes = Math.floor((timeInSeconds % 3600) / 60);
+        const seconds = timeInSeconds % 60;
+
+        this.countdown = `${this.formatTime(hours)}:${this.formatTime(minutes)}:${this.formatTime(seconds)}`;
+
+        if (timeInSeconds <= 0) {
+          clearInterval(this.countdownInterval);
+          this.countdown = '00:00:00';
+          this.startCountdown(); // Restart the countdown for the next day
+        }
+      }, 1000);
+      this.updateMiningDistributionCountdown(this.countdown);
+    },
+    formatTime(time) {
+      return time.toString().padStart(2, '0')
     },
     fetchTokenUris: async function (tokenIds, force = false) {
       for (const tokenId of tokenIds) {
@@ -401,6 +499,77 @@ export default {
     setGenerator(name) {
       this.selectedGenerator = name;
     },
+    async getData() {
+      try {
+        const coinsResponse = await axios.get('https://api.idena.io/api/coins');
+        const stakingResponse = await axios.get('https://api.idena.io/api/staking');
+        const onlineResponse = await axios.get('https://api.idena.io/api/onlineminers/count');
+        const epochResponse = await axios.get('https://api.idena.io/api/epoch/last');
+        const epochNumber = epochResponse.data.result.epoch - 1;
+        const prevEpochResponse = await axios.get(`https://api.idena.io/api/epoch/${epochNumber}`);
+        const rewardsResponse = await axios.get(`https://api.idena.io/api/epoch/${epochNumber}/rewardssummary`);
+        const epochStart = new Date(prevEpochResponse.data.result.validationTime);
+        const epochEnd = new Date(epochResponse.data.result.validationTime);
+        const nowDate = new Date();
+        const epochDuration = Math.round(Math.abs((epochEnd.getTime() - epochStart.getTime()) / 86400000));
+        const epochDurationMinutes = epochDuration * 24 * 60;
+        const epochLeftMinutes = Math.round(Math.max(0, ((epochEnd.getTime() - nowDate.getTime()) / 86400000) * 24 * 60));
+        const epochLeftPercent = Math.min(99, (epochLeftMinutes / epochDurationMinutes) * 100);
+        const epochLeft = epochLeftMinutes < 60 ? epochLeftMinutes : epochLeftMinutes > 24 * 60 ? Math.round(epochLeftMinutes / 24 / 60) : Math.round(epochLeftMinutes / 60);
+        const epochLeftUnit = epochLeftMinutes < 60 ? 'Minutes' : epochLeftMinutes > 24 * 60 ? 'Days' : 'Hours';
+
+        this.weight = stakingResponse.data.result.weight;
+        this.totalShares = stakingResponse.data.result.minersWeight;
+        this.averageMinerWeight = stakingResponse.data.result.averageMinerWeight;
+        this.rewardFund = {
+          extraFlips: rewardsResponse.data.result.extraFlips,
+          invitations: rewardsResponse.data.result.invitations,
+        };
+        this.rewardWeight = {
+          extraFlips: stakingResponse.data.result.extraFlipsWeight,
+          invitations: stakingResponse.data.result.invitationsWeight,
+        };
+        this.onlineSize = onlineResponse.data.result;
+        this.epochRewardFund = rewardsResponse.data.result.staking && rewardsResponse.data.result.staking > 0 ? rewardsResponse.data.result.staking : rewardsResponse.data.result.validation * this.STAKING_POWER;
+        this.totalStake = coinsResponse.data.result.totalStake;
+        this.epochNum = epochResponse.data.result.epoch;
+        this.epochTime = {
+          epochDuration,
+          epochLeftPercent,
+          epochLeft,
+          epochLeftUnit,
+        };
+      } catch (e) {
+        console.error('cannot fetch API', e);
+      }
+    },
+    calculateEstimatedMiningReward(stakeWeight, averageMinerWeight, onlineMinersCount, epochDays) {
+    const proposerOnlyReward = (6 * stakeWeight * 20) / (stakeWeight * 20 + averageMinerWeight * 100);
+    const committeeOnlyReward = (6 * stakeWeight) / (stakeWeight + averageMinerWeight * 119);
+    const proposerAndCommitteeReward = (6 * stakeWeight * 21) / (stakeWeight * 21 + averageMinerWeight * 99);
+
+    const proposerProbability = 1 / onlineMinersCount;
+    const committeeProbability = Math.min(100, onlineMinersCount) / onlineMinersCount;
+
+    const proposerOnlyProbability = proposerProbability * (1 - committeeProbability);
+    const committeeOnlyProbability = committeeProbability * (1 - proposerProbability);
+    const proposerAndCommitteeProbability = proposerOnlyProbability * committeeOnlyProbability;
+
+    return ((85000 * epochDays) / 21.0) * (proposerOnlyProbability * proposerOnlyReward + committeeOnlyProbability * committeeOnlyReward + proposerAndCommitteeProbability * proposerAndCommitteeReward);
+  },
+    calcStakingReward(amount) {
+    return (amount ** this.STAKING_POWER / (amount ** this.STAKING_POWER + this.weight)) * this.epochRewardFund;
+  },
+  calcExtraFlipReward(amount) {
+    return (amount ** this.STAKING_POWER / this.rewardWeight.extraFlips) * this.rewardFund.extraFlips;
+  },
+  calcInvitationReward(amount) {
+    return (amount ** this.STAKING_POWER / this.rewardWeight.invitations) * this.rewardFund.invitations;
+  },
+  calcMiningReward(amount) {
+    const myStakeWeight = amount ** this.STAKING_POWER;
+    return this.calculateEstimatedMiningReward(myStakeWeight, this.averageMinerWeight, this.onlineSize, this.epochTime.epochDuration);
+  },
     refreshURI: async function (tokenId) {
       await this.fetchTokenUris([tokenId], true);
     },
@@ -436,7 +605,13 @@ export default {
     },
   },
   mounted() {
-    //this.loadMapData(); 
+    //this.loadMapData();
+    // this.fetchValidationTime();
+    // this.startCountdown();
+
+    console.log("starting mining countdown");
+    // this.startCountdown();
+    // console.log(this.startValidationCountdown());
     if (localStorage.address != null) {
       console.log("address in storage", localStorage.address);
       if (isValidAddress(localStorage.address) == false) {
