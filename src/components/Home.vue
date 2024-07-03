@@ -326,6 +326,7 @@ import axios from 'axios';
 //import Globe from 'globe.gl';
 import Globe from 'globe.gl';
 import texture from '/src/assets/pobrane-jasne.png';
+import { mapState } from 'vuex'
 
 export default {
   data() {
@@ -338,6 +339,13 @@ export default {
       globeInitialized: false
     };
   },
+  computed: {
+    ...mapState({
+      geoJsonData: (state) => state.geoJsonData,
+    })
+    
+  },
+  
   mounted() {
       this.initGlobe();
       this.countTransactions();
@@ -395,6 +403,7 @@ export default {
     //     });
     // },
     initGlobe() {
+      console.log('Initializing globe')
       const width = document.documentElement.clientWidth * 0.65;
       const height = document.documentElement.clientHeight * 0.6;
 
@@ -487,6 +496,7 @@ export default {
       //     console.error('Error fetching labelfont:', error);
       //   });  
 
+          // this.world.polygonsData(this.geoJsonData);
       fetch('/src/assets/simplifiedmap.geojson')
         .then(res => res.json())
         .then(countries => {

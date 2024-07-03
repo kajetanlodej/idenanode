@@ -59,34 +59,41 @@
     <!-- <p>Delegate using official <a href="https://app.idena.io" target="_blank">Idena web app</a></p> -->
     <!-- <button class="button" type="button" @click="delegate">DELEGATE</button> -->
      <div class="spinner-border text-primary" role="status">
-  <span class="visually-hidden">Loading...</span>
+  <!-- <span class="visually-hidden">Loading...</span> -->
 </div>
 
     <button 
       class="button" 
       type="button" 
       v-if="loggedAddress !== null && !isMyPoolDelegatee" 
-      @click="sendDelegateTx"
+      @click="handleDelegateClick"
+      :disabled="this.delegationPopup"
     >
-      DELEGATE
+      <span v-if="!this.delegationPopup">DELEGATE</span>
+      <span v-else class="loader"></span>
     </button>
     <button 
       class="button" 
       type="button" 
       v-else-if="loggedAddress !== null && delegatee !== null && isMyPoolDelegatee" 
-      @click="sendUnDelegateTx"
+      @click="handleUnDelegateClick"
+      :disabled="this.delegationPopup"
     >
-      UNDELEGATE
+      <span v-if="!this.delegationPopup">UNDELEGATE</span>
+      <span v-else class="loader"></span>
     </button>
     <button 
       class="button" 
       type="button"
       v-else-if="loggedAddress === null"
-      :disabled="delegatee === null" 
+      :disabled="delegatee === null || this.delegationPopup"
     >
-      DELEGATE
+      <span v-if="!this.delegationPopup">DELEGATE</span>
+      <span v-else class="loader"></span>
     </button>
-    
+<!-- <div class="spinner-border" role="status">
+  <span class="sr-only">Loading...</span>
+</div> -->
     <!-- <div id="title">
         <h3>DELEGATION ADDRESS</h3>
         
@@ -105,7 +112,7 @@
 
       <div id ="validation">
         <span id="clock">{{ this.miningCountdown }}</span>
-        <span id="clock">{{ this.validationCountdown }}</span>
+        <span id="clock">{{ this.validationCountdown}}</span>
       </div>
       
     </div>  
@@ -272,7 +279,7 @@
   </div>
 </template>
 <script>
-
+import { mapActions } from 'vuex';
 import { mapState } from 'vuex'
 import axios from 'axios'
 import {
@@ -301,6 +308,7 @@ export default {
       const conn = new Conn(this.connected, NODE_URL, NODE_KEY);
 
     return {
+      popupOpen: false,
       conn,
       countdown: '00:00:00',
       countdown1: '00:00:00:00',
@@ -341,7 +349,8 @@ export default {
       invitationReward: (state) => state.invitationReward,
       apy: (state) => state.apy,
       miningCountdown: (state) => state.miningDistributionCountdown,
-      validationCountdown: (state) => state.stakingDistributionCountdown
+      validationCountdown: (state) => state.stakingDistributionCountdown,
+      delegationPopup: (state) => state.delegationPopup,
     }),
     isMyPoolDelegatee() {
       console.log("1 i 2",this.delegatee, POOL_ADDRESS);
@@ -351,16 +360,17 @@ export default {
   },
 
   mounted() {
-    this.fetchValidationTime();
-    this.startCountdown()
-    this.fetchDelegators()
+    // this.fetchValidationTime();
+    // this.startCountdown();
+    this.fetchDelegators();
     this.fetchTotalDelegators();
-    this.getData();
+    // this.getData();
     this.fetchTransactions();
 
   },
   methods: {
        sendDelegateTx: async function () {
+
     const argsArray = [
       {
         index: 0,
@@ -371,7 +381,24 @@ export default {
     // console.log(this.loggedAddress,"ADDDDDDDD");
     await this.buildTx("delegate", argsArray, 0x12);
 },
+...mapActions(['updateDelegationPopup']),
+async handleDelegateClick() {
+      this.updateDelegationPopup(true);
+      console.log("popup CZY JEST ODPALONY???????",this.delegationPopup)
+      // this.popupOpen = true;
+      await this.sendDelegateTx();
+      console.log("PENDING TXSSSSSSSSSSSSSSSS",this.pendingTxsss )
+      this.pendingTxsss = (await this.conn.getPendingTx("0x71eecdf6414eda0be975c2b748a74ca5018460e4"));
+      console.log("PENDING TXSSSSSSSSSSSSSSSS",this.pendingTxsss )
+    },
+    async handleUnDelegateClick() {
+      this.updateDelegationPopup(true);
+      // this.popupOpen = true;
+      await this.sendUnDelegateTx();
+
+    },
     sendUnDelegateTx: async function () {
+
         const argsArray = [
           {
             index: 0,
@@ -383,12 +410,25 @@ export default {
         await this.buildTx("delegate", argsArray, 0x13);
     },
   buildTx: async function (method, args, TxType, amountInt = 0) {
-      console.log("MINING REWARD Z KOMPONENTU DELEGATION",this.miningReward);
-      console.log("APY Z KOMPONENETU DELEGATION",this.apy);
-      console.log("minign distribution countdown z delegation",this.miningCountdown);
+      // console.log("MINING REWARD Z KOMPONENTU DELEGATION",this.miningReward);
+      // console.log("APY Z KOMPONENETU DELEGATION",this.apy);
+      // console.log("minign distribution countdown z delegation",this.miningCountdown);
+      // console.log(this.validationCountdown,"validation countdown z delegation WZNEEEEEEEEEEEEEEEEEEEEEEEEEEEEE")
       const windowFeatures = "left=100,top=100,width=400,height=700";
       var popup = window.open("", "_blank",windowFeatures);
+
+       const popupCheckInterval = setInterval(() => {
+        if (this.delegationPopup && !popup.closed) {
+          console.log("Popup is open");
+        } else {
+          console.log("Popup is closed");
+          clearInterval(popupCheckInterval);
+          this.updateDelegationPopup(false);
+        }
+      }, 1000);
       this.generating = true;
+
+      console.log(this.generating,"generating");
       console.log(method, args);
       try {
         // const nonce = this.addressNonce + 1;
@@ -437,6 +477,7 @@ export default {
         console.error(e);
       }
       this.generating = false;
+      console.log(this.generating,"generating");
 
     },
     async getData() {
@@ -925,7 +966,7 @@ a:active {
   line-height: 20px;
   max-width: 480px;
   min-height: 40px;
-  min-width: 0px;
+  min-width: 180px;
   overflow: hidden;
   padding: 0px;
   padding-left: 20px;
@@ -954,4 +995,22 @@ a:active {
   background: rgba(0, 0, 0, .08);
   color: rgba(0, 0, 0, .3);
 }
+.loader {
+    width: 24px;
+    height: 24px;
+    border: 3px solid #FFF;
+    border-bottom-color: transparent;
+    border-radius: 50%;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+    }
+
+    @keyframes rotation {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+    } 
 </style>

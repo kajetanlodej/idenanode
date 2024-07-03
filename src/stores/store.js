@@ -12,6 +12,7 @@ export default createStore({
     loggedAddress: null, // Add delegatee to the state
     miningDistributionCountdown: 0,
     stakingDistributionCountdown: 0,
+    delegationPopup: false,
   },
   mutations: {
     setStake(state, stake) {
@@ -44,6 +45,9 @@ export default createStore({
     setStakingDistributionCountdown(state, stakingDistributionCountdown) {
       state.stakingDistributionCountdown = stakingDistributionCountdown;
     },
+    setDelegationPopup(state, delegationPopup) {
+      state.delegationPopup = delegationPopup;
+    }
   },
   actions: {
     updateStake({ commit }, stake) {
@@ -76,6 +80,10 @@ export default createStore({
     updateStakingDistributionCountdown({ commit }, stakingDistributionCountdown) {
       commit('setStakingDistributionCountdown', stakingDistributionCountdown);
     },
+    updateDelegationPopup({ commit }, delegationPopup) {
+      commit('setDelegationPopup', delegationPopup);
+    }
+
   },
   getters: {
     stake: (state) => state.stake,
@@ -87,6 +95,7 @@ export default createStore({
     delegatee: (state) => state.delegatee,
     loggedAddress: (state) => state.loggedAddress,
     miningDistributionCountdown: (state) => state.miningDistributionCountdown,
-    stakingDistributionCountdown: (state) => state.stakingDistributionCountdown
+    stakingDistributionCountdown: (state) => state.stakingDistributionCountdown,
+    delegationPopup: (state) => state.delegationPopup,
   }
 });

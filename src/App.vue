@@ -24,6 +24,7 @@ import { Buffer } from "buffer";
 import { BN } from "bn.js";
 import * as proto from "./proto/models_pb.js";
 import axios from 'axios'
+import Globe from 'globe.gl';
 
 </script>
 
@@ -83,6 +84,7 @@ import axios from 'axios'
 </template> -->
 <script>
 import { mapActions } from 'vuex';
+// import { update } from 'cypress/types/lodash';
 
 export default {
   name: "App",
@@ -340,31 +342,32 @@ export default {
         this.updateStake(this.stake);
         console.log("calling getData");
         this.getData();
-        this.updateMiningReward(this.calcMiningReward(this.stake));
-        console.log("callingcalcMiningReward", this.calcMiningReward(this.stake));
-        this.updateStakingReward(this.calcStakingReward(this.stake));
-        this.updateExtraFlipReward(this.calcExtraFlipReward(this.stake));
-        this.updateInvitationReward(this.calcInvitationReward(this.stake));
-        this.updateApy((
-            (
-              (
-                this.calcMiningReward(this.stake) +
-                this.calcStakingReward(this.stake) +
-                this.calcExtraFlipReward(this.stake) +
-                this.calcInvitationReward(this.stake)
-              ) * 100 / this.stake
-            ) * 366
-          ) / this.epochTime.epochDuration);
-          console.log("apy z komponentu App.vue", ((
-            (
-              (
-                this.stakingReward +
-                this.miningReward +
-                this.extraFlipReward +
-                this.invitationReward
-              ) * 100 / this.stake
-            ) * 366
-          ) / this.epochTime.epochDuration));
+
+        // this.updateMiningReward(this.calcMiningReward(this.stake));
+        // console.log("callingcalcMiningReward", this.calcMiningReward(this.stake));
+        // this.updateStakingReward(this.calcStakingReward(this.stake));
+        // this.updateExtraFlipReward(this.calcExtraFlipReward(this.stake));
+        // this.updateInvitationReward(this.calcInvitationReward(this.stake));
+        // this.updateApy((
+        //     (
+        //       (
+        //         this.calcMiningReward(this.stake) +
+        //         this.calcStakingReward(this.stake) +
+        //         this.calcExtraFlipReward(this.stake) +
+        //         this.calcInvitationReward(this.stake)
+        //       ) * 100 / this.stake
+        //     ) * 366
+        //   ) / this.epochTime.epochDuration);
+        //   console.log("apy z komponentu App.vue", ((
+        //     (
+        //       (
+        //         this.stakingReward +
+        //         this.miningReward +
+        //         this.extraFlipReward +
+        //         this.invitationReward
+        //       ) * 100 / this.stake
+        //     ) * 366
+        //   ) / this.epochTime.epochDuration));
         // console.log("apy z komponentu App.vue", this.apy);
         // this.identity.state = "Human";
         // this.identity.address = this.address;
@@ -383,6 +386,7 @@ export default {
         }
       }
     },
+    
         async fetchValidationTime() {
       try {
         const response = await axios.get('https://api.idena.io/api/Epoch/Last');
@@ -394,6 +398,7 @@ export default {
         console.error('Error fetching validation time:', error);
       }
     },
+    
     startValidationCountdown() {
       this.countdownInterval = setInterval(() => {
         const now = new Date();
@@ -412,8 +417,9 @@ export default {
         const seconds = timeInSeconds % 60;
 
         this.countdown1 = `${this.formatTime(days)}:${this.formatTime(hours)}:${this.formatTime(minutes)}:${this.formatTime(seconds)}`;
-      }, 1000);
+        // console.log("countdown1 z metody startValidationCouuntdown", this.countdown1); //sprawdzic to czy sie wywoluje w kosnoli
         this.updateStakingDistributionCountdown(this.countdown1);
+      }, 1000);
     },
   
     startCountdown() {
@@ -435,18 +441,22 @@ export default {
         const seconds = timeInSeconds % 60;
 
         this.countdown = `${this.formatTime(hours)}:${this.formatTime(minutes)}:${this.formatTime(seconds)}`;
+        this.updateMiningDistributionCountdown(this.countdown);
 
         if (timeInSeconds <= 0) {
           clearInterval(this.countdownInterval);
           this.countdown = '00:00:00';
+          this.updateMiningDistributionCountdown(this.countdown); //potrzebne to tutaj?
           this.startCountdown(); // Restart the countdown for the next day
         }
       }, 1000);
+      console.log("countdown prosto z metodu startCountdown", this.countdown);
       this.updateMiningDistributionCountdown(this.countdown);
     },
     formatTime(time) {
       return time.toString().padStart(2, '0')
     },
+    
     fetchTokenUris: async function (tokenIds, force = false) {
       for (const tokenId of tokenIds) {
         let tokenUri = await this.getFromCache("tokenUris", tokenId);
@@ -500,6 +510,7 @@ export default {
       this.selectedGenerator = name;
     },
     async getData() {
+      console.log("CALLING GETDATA FROM APP.VUE")
       try {
         const coinsResponse = await axios.get('https://api.idena.io/api/coins');
         const stakingResponse = await axios.get('https://api.idena.io/api/staking');
@@ -539,6 +550,25 @@ export default {
           epochLeft,
           epochLeftUnit,
         };
+        console.log("results epochtime from app.data",this.epochTime.epochDuration, this.epochTime.epochLeftPercent, this.epochTime.epochLeft, this.epochTime.epochLeftUnit);
+        this.updateMiningReward(this.calcMiningReward(this.stake));
+        console.log("callingcalcMiningReward", this.calcMiningReward(this.stake));
+        this.updateStakingReward(this.calcStakingReward(this.stake));
+        this.updateExtraFlipReward(this.calcExtraFlipReward(this.stake));
+        this.updateInvitationReward(this.calcInvitationReward(this.stake));
+        this.updateApy((
+            (
+              (
+                this.calcMiningReward(this.stake) +
+                this.calcStakingReward(this.stake) +
+                this.calcExtraFlipReward(this.stake) +
+                this.calcInvitationReward(this.stake)
+              ) * 100 / this.stake
+            ) * 366
+          ) / this.epochTime.epochDuration);
+
+
+
       } catch (e) {
         console.error('cannot fetch API', e);
       }
@@ -568,8 +598,22 @@ export default {
   },
   calcMiningReward(amount) {
     const myStakeWeight = amount ** this.STAKING_POWER;
+    console.log("calling calcMiningReward");
     return this.calculateEstimatedMiningReward(myStakeWeight, this.averageMinerWeight, this.onlineSize, this.epochTime.epochDuration);
   },
+
+//   async fetchGeoJsonData() {
+//   fetch('/src/assets/simplifiedmap.geojson')
+//         .then(res => res.json())
+//         .then(countries => {
+//           this.updateGeoJsonData(countries.features);
+//           // console.log(countries.features, "country features")
+//         })
+//         .catch(error => {
+//           console.error('Error fetching map data:', error);
+//         });
+// },
+  
     refreshURI: async function (tokenId) {
       await this.fetchTokenUris([tokenId], true);
     },
@@ -606,12 +650,14 @@ export default {
   },
   mounted() {
     //this.loadMapData();
-    // this.fetchValidationTime();
+    this.fetchValidationTime();
+    console.log("fetching geojson data");
+    // this.fetchGeoJsonData();
     // this.startCountdown();
 
     console.log("starting mining countdown");
-    // this.startCountdown();
-    // console.log(this.startValidationCountdown());
+    this.startCountdown();
+    console.log(this.countdown);
     if (localStorage.address != null) {
       console.log("address in storage", localStorage.address);
       if (isValidAddress(localStorage.address) == false) {

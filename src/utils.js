@@ -85,7 +85,7 @@ function toHexString(byteArray, withPrefix = false) {
     );
 }
 
-module.exports = {
+export {
     bufferToInt,
     toBuffer,
     hexToUint8Array,

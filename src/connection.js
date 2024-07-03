@@ -70,7 +70,9 @@ export class Conn {
   async getIdentity(address) {
     return await this.call("dna_identity", [address]);
   }
-
+  async getPendingTx(address) {
+    return await this.call("bcn_pendingTransactions", [address]);
+  }
   async getEpoch() {
     return await this.call("dna_epoch");
   }
