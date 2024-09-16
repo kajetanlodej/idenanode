@@ -35,16 +35,57 @@ import Globe from 'globe.gl';
   <header >
   <!-- <button @click="sendDelegateTx">Sign Out</button> -->
       <nav>
-        <RouterLink to="/">STATUS</RouterLink>
-        <RouterLink to ="/delegation">DELEGATION</RouterLink>
+        <RouterLink to="/" style="transition: none; 
+        -webkit-transform: scale(1) ;
+     -moz-transform: scale(1);
+       -o-transform: scale(1);
+      -ms-transform: scale(1);
+          transform: scale(1) ;">
+          <img src="./assets/logo.png" class="logo" />
+        </RouterLink>
+        <!-- STATUS Navigation Element with both text and SVG -->
+                <!-- STATUS Navigation Element with both text and SVG -->
+        <RouterLink to="/">
+          <span class="nav-text status-text">STATUS</span>
+          <svg class="nav-icon status-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+            viewBox="0 0 16 16">
+              <path d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L2 8.207V13.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V8.207l.646.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293zM13 7.207V13.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V7.207l5-5z"/>
+          </svg>
+        </RouterLink>
+         <!-- DELEGATION Navigation Element with both text and SVG -->
+        <RouterLink to="/delegation">
+          <span class="nav-text delegation-text">DELEGATION</span>
+          <svg class="nav-icon delegation-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+            viewBox="0 0 16 16">
+            <path
+              d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7m.354-5.854 1.5 1.5a.5.5 0 0 1-.708.708L13 11.707V14.5a.5.5 0 0 1-1 0v-2.793l-.646.647a.5.5 0 0 1-.708-.708l1.5-1.5a.5.5 0 0 1 .708 0M11 5a3 3 0 1 1-6 0 3 3 0 0 1 6 0M8 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4" />
+            <path
+              d="M8.256 14a4.5 4.5 0 0 1-.229-1.004H3c.001-.246.154-.986.832-1.664C4.484 10.68 5.711 10 8 10q.39 0 .74.025c.226-.341.496-.65.804-.918Q8.844 9.002 8 9c-5 0-6 3-6 4s1 1 1 1z" />
+          </svg>
+        </RouterLink>
         
-        <RouterLink to ="/about">ABOUT</RouterLink>
+        <!-- ABOUT Navigation Element with both text and SVG -->
+        <RouterLink to="/about">
+          <span class="nav-text about-text">ABOUT</span>
+          <svg class="nav-icon about-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+            viewBox="0 0 16 16">
+            <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/>
+            <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>
+          </svg>
+        </RouterLink>
       </nav>
+      
       <Identity :identity="identity" @signOut="signOut" @signIn="signIn" />
+      <div id = "media" class="media">
+        <i class="fa fa-github"></i>
+        <i class="fa fa-telegram" ></i>
+      </div>
 
+      
   </header>
+
   <RouterView/>
-  
+
 </div>
 
   <!-- <div id="wrapper">
@@ -84,6 +125,8 @@ import Globe from 'globe.gl';
 </template> -->
 <script>
 import { mapActions } from 'vuex';
+import texture from '/src/assets/pobrane-jasne.png';
+
 // import { update } from 'cypress/types/lodash';
 
 export default {
@@ -181,6 +224,7 @@ export default {
       this.updateStakingReward(0);
       this.updateExtraFlipReward(0);
       this.updateInvitationReward(0);
+      this.updateDelegateeCheck(false);
     },
     sendGenerateTx: async function () {
       const args = [
@@ -325,7 +369,7 @@ export default {
         await new Promise((resolve) => setTimeout(resolve, 2000));
       }
     },
-    ...mapActions(['updateStake', 'updateDelegatee','updateLoggedAddress','updateMiningReward','updateStakingReward','updateExtraFlipReward','updateInvitationReward','updateApy','updateMiningDistributionCountdown','updateStakingDistributionCountdown']),
+    ...mapActions(['updateStake', 'updateDelegatee','updateLoggedAddress','updateMiningReward','updateStakingReward','updateExtraFlipReward','updateInvitationReward','updateApy','updateMiningDistributionCountdown','updateStakingDistributionCountdown','updateDelegateeCheck','updateGlobeInicialized']),
     initAddress: async function () {
       console.log("initAddress");
       if (this.address) {
@@ -647,14 +691,181 @@ export default {
         console.error("Error while storing in cache:", e);
       }
     },
+    initGlobe() {
+      console.log('Initializing globe')
+      const width = document.documentElement.clientWidth * 0.65;
+      const height = document.documentElement.clientHeight * 0.6;
+
+      this.world = Globe({ animateIn: false, waitForGlobeReady: false })
+        // (document.getElementById('globeViz'))
+        .width(width)
+        .height(height)
+         .globeImageUrl(texture)
+         //.globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
+        .pointOfView({ lat: 51, lng: 9, altitude: 1.6 }) // aim at Germany
+        .polygonAltitude(0.05)
+        .polygonCapColor(() => '#056CF2')
+        .polygonSideColor(() => 'rgba(0, 0, 0, 0)')
+        .polygonCapCurvatureResolution(5)
+        .labelsData([
+          {
+            lat: 51,
+            lng: 10,
+            text: 'Germany',
+            altitude: 0.059,
+            dotradius: 1.2,
+            size: 1.2,
+            color: '#0000001', // Set the color to black (#000000) for the first label
+            desc: 'Shared  node'
+          },
+          { //Background
+            lat: 51.2,
+            lng: 10,
+            text: 'Germany',
+            altitude: 0.06,
+            dotradius: 1.2,
+            size: 1.25,
+            color: '#000000',
+            desc: 'Shared  node'
+
+          },
+          // { 
+          //   lat: 52.5,
+          //   lng: 19,
+          //   text: 'Poland',
+          //   altitude: 0.06,
+          //   dotradius: 1.2,
+          //   size: 1.2,
+          //   color: '#000000',
+          //   desc: 'Mining  node'
+          // }
+        ]).labelLat(d => d.lat)
+        .labelLng(d => d.lng)
+        .labelText(d => d.text)
+        .labelSize(d => d.size) // Adjust label size as needed
+        .labelDotRadius(d => d.dotradius)
+        .labelAltitude(d => d.altitude) // Set label altitude from the data
+        .labelColor(d => d.color)
+        .polygonStrokeColor(() => '#f0f2f5')
+        .labelLabel(d => `
+        <div id="hoverStats">
+        <div id="hoverTitle"><b>${d.desc}</b></div>
+        <div id="numberOfKeys">
+          API keys sold:
+        <span id="totalSold"> ${this.transactionCount} in total</span>
+        <span id="thisEpochSold">${this.thisEpochTransactionCount} this epoch</span>  
+    </div>
+        
+        </div>
+      `)
+        .backgroundColor('#f0f2f5');
+
+    //   const globeMaterial = this.world.globeMaterial();
+    //   globeMaterial.bumpScale = 10;
+    //   new THREE.TextureLoader().load('/src/assets/pobrane-jasne.png', texture => {
+    //   globeMaterial.specularMap = texture;
+    //   globeMaterial.specular = new THREE.Color('grey');
+    //   globeMaterial.shininess = 15;
+    // });
+
+
+
+      // fetch('/src/assets/font.json')
+      //   .then(response => {
+      //     if (!response.ok) {
+      //       throw new Error('Network response was not ok');
+      //     }
+      //     return response.json();
+      //   })
+      //   .then(data => {
+      //     this.labelfont = data;
+      //     this.world.labelTypeFace(this.labelfont);
+      //   })
+      //   .catch(error => {
+      //     console.error('Error fetching labelfont:', error);
+      //   });  
+
+          // this.world.polygonsData(this.geoJsonData);
+      fetch('/src/assets/simplifiedmap.geojson')
+        .then(res => res.json())
+        .then(countries => {
+          this.world.polygonsData(countries.features);
+        })
+        .catch(error => {
+          console.error('Error fetching map data:', error);
+        });
+        this.updateGlobeInicialized(this.world);
+        console.log("globe initialized", this.world);
+        
+    },
+           makeSyncingRequest() {
+      const rpcEndpoint = 'https://idenanode.com';
+      const payload = {
+        method: 'bcn_syncing',
+        params: [],
+        id: 1,
+        key: '22ref1stat122',
+      };
+
+      return axios.post(rpcEndpoint, payload)
+        .then(response => response.data)
+        .catch(error => {
+          console.error('Error:', error);
+          throw error;
+        });
+    },
+        handleRefreshClick() {
+         //world.labelColor(() => 'rgba(0, 0, 0, 1)');
+
+      this.world.labelColor(d => {
+        if (d.text === 'Germany' && d.color !== '#000000') {
+          return 'rgba(0, 0, 0, 0.6)'; // Keep the shadow 0.6 opacity on refresh
+        }
+      });
+
+      this.makeSyncingRequest()
+        .then(data => {
+          console.log(data);
+          // Determine color based on 'syncing' field
+          const labelColor = data.result.syncing ? '#FF681E' : '#00FF00';
+          // Update label colors
+          this.world.labelColor(d => {
+            if (d.text === 'Germany' && d.color !== '#000000') {
+              return 'rgba(0, 0, 0, 0.6)'; // Keep the 'Germany' label black
+            } else if (d.text === 'Germany') {
+              return labelColor; // Change color for the 'Another Label'
+            } else {
+              return d.color; // Keep other labels' color as is
+            }
+          });
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          // Offline color
+          const offlineColor = '#FF000D';
+
+          // Update label colors
+          this.world.labelColor(d => {
+            if (d.text === 'Germany' && d.color !== '#000000') {
+              return 'rgba(0, 0, 0, 0.6)'; // Keep the 'Germany' label black
+            } else if (d.text === 'Germany') {
+              return offlineColor; // Change color for the 'Another Label'
+            } else {
+              return d.color; // Keep other labels' color as is
+            }
+          });
+        });
+    },
   },
   mounted() {
     //this.loadMapData();
     this.fetchValidationTime();
+    this.initGlobe();
+
+    this.handleRefreshClick();
     console.log("fetching geojson data");
     // this.fetchGeoJsonData();
     // this.startCountdown();
-
     console.log("starting mining countdown");
     this.startCountdown();
     console.log(this.countdown);
@@ -791,7 +1002,7 @@ export default {
 <style scoped> /*TODO: SCOPED?*/
 
 #wrapper{
-  width: 65vw;
+  width: 100vw;
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -799,22 +1010,27 @@ export default {
 
 header {
   width: 100%;
-  height: 10%;
+  height: 65px;
   display: flex;
   flex-direction: row;
-
+  background-color: white;
+/* border-bottom: solid red 1px; */
+box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.1);
 }
 
 nav{
   width: 50%;
-  height: 100%;
+  height: 65px;
   display: flex;
   align-items: center;
-  justify-content: space-evenly;
+  justify-content: space-between;
+  padding-left: 30px;
+  padding-right: 200px
   
 }
 
 nav a {
+  margin-right: 15px;
   transition: transform 0.15s linear;
   backface-visibility: hidden;
   -webkit-font-smoothing: subpixel-antialiased;
@@ -833,6 +1049,16 @@ nav a.router-link-exact-active {
       -ms-transform: scale(1.1) translate3d( 0, 0, 0) perspective(1px);
           transform: scale(1.1) translate3d( 0, 0, 0) perspective(1px);
 }
+
+.logo{
+  width: 40px;
+  height: 40px;
+  transition:none;
+  margin-right: 30px;
+  /* background-color: #f0f2f5; */
+  /* margin-left: 30px; */
+}
+
 /* body{
   display: flex;
   flex-direction: column;
@@ -898,4 +1124,105 @@ nav a:first-of-type {
     margin-top: 1rem;
   }
 } */
+ /* Hide the SVG icon by default */
+.status-icon {
+  display: none;
+  width: 16px; /* Original size */
+  height: 16px; /* Original size */
+  transform: scale(1.5); /* 2x scale */
+}
+.delegation-icon {
+  display: none;
+  width: 16px; /* Original size */
+  height: 16px; /* Original size */
+  transform: scale(1.5); /* 2x scale */
+}
+.about-icon {
+  display: none;
+  width: 16px; /* Original size */
+  height: 16px; /* Original size */
+  transform: scale(1.5); /* 2x scale */
+}
+
+/* Show text by default */
+.status-text {
+  display: inline-block;
+}
+.delegation-text {
+  display: inline-block;
+}
+.status-text {
+  display: inline-block;
+}
+
+#media{
+display: flex; flex-direction: row; height: 100%; align-items: center; justify-content: center; margin-top: 0px; margin-right: 15px; 
+}
+
+/* Mobile View: When screen is smaller than 768px */
+@media (max-width: 768px) {
+  /* Hide text and show the icon on smaller screens */
+  .status-text{
+    display: none;
+  }
+  .delegation-text{
+    display: none;
+  }
+  .about-text{
+    display: none;
+  }
+  .logo{
+    margin-right: 20px;
+  }
+  #media{
+    flex-direction: column; padding-left: 12px; padding-right: 12px;
+  }
+  nav{
+    padding-left:15px;
+  }
+
+  .identity{
+    margin-right: 0px;
+    padding-right: 0px;
+  }
+  .fa-github{
+    margin-right: 0rem;
+  }
+  .status-icon{
+    display: inline-block;
+    margin-right: 20px;
+    margin-left: 0px;
+  }
+  .delegation-icon{
+    display: inline-block;
+    margin-right: 20px;
+
+  }
+  .about-icon{
+    display: inline-block;
+    margin-right: 20px;
+
+  }
+  i{
+    margin-right: 0px;
+  }
+
+  .logo{
+    display: none;
+  }
+}
+
+.menu-icon {
+  display: none;
+  font-size: 30px;
+  cursor: pointer;
+}
+.fa-github{
+  font-size:25px;color:#0866ff; height: 25px; width: 25px; margin-right: 0px; padding-left: 1px;
+}
+
+.fa-telegram
+{
+  margin-left:3px;font-size:21px;color:#0866ff;margin-right:3px;
+}
 </style>

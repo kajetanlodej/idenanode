@@ -65,7 +65,7 @@
     <button 
       class="button" 
       type="button" 
-      v-if="loggedAddress !== null && !isMyPoolDelegatee" 
+      v-if="loggedAddress !== null && !isMyPoolDelegatee && !myDelegatee" 
       @click="handleDelegateClick"
       :disabled="this.delegationPopup"
     >
@@ -75,14 +75,14 @@
     <button 
       class="button" 
       type="button" 
-      v-else-if="loggedAddress !== null && delegatee !== null && isMyPoolDelegatee" 
+      v-else-if="loggedAddress !== null && delegatee !== null && isMyPoolDelegatee || myDelegatee" 
       @click="handleUnDelegateClick"
       :disabled="this.delegationPopup"
     >
       <span v-if="!this.delegationPopup">UNDELEGATE</span>
       <span v-else class="loader"></span>
     </button>
-    <button 
+    <button  
       class="button" 
       type="button"
       v-else-if="loggedAddress === null"
@@ -106,8 +106,8 @@
 
     <div id="countdowns">
       <div id="titles">
-        <div id="left">Mining rewards distribution in</div>
-        <div id="right">Validation rewards distribution in</div>
+        <div id="left">Mining rewards distribution</div>
+        <div id="right">Validation rewards distribution</div>
       </div>
 
       <div id ="validation">
@@ -351,6 +351,7 @@ export default {
       miningCountdown: (state) => state.miningDistributionCountdown,
       validationCountdown: (state) => state.stakingDistributionCountdown,
       delegationPopup: (state) => state.delegationPopup,
+      myDelegatee: (state) => state.myDelegatee,
     }),
     isMyPoolDelegatee() {
       console.log("1 i 2",this.delegatee, POOL_ADDRESS);
@@ -381,15 +382,15 @@ export default {
     // console.log(this.loggedAddress,"ADDDDDDDD");
     await this.buildTx("delegate", argsArray, 0x12);
 },
-...mapActions(['updateDelegationPopup']),
+...mapActions(['updateDelegationPopup', 'updateDelegateeCheck']),
 async handleDelegateClick() {
       this.updateDelegationPopup(true);
       console.log("popup CZY JEST ODPALONY???????",this.delegationPopup)
       // this.popupOpen = true;
       await this.sendDelegateTx();
-      console.log("PENDING TXSSSSSSSSSSSSSSSS",this.pendingTxsss )
-      this.pendingTxsss = (await this.conn.getPendingTx("0x71eecdf6414eda0be975c2b748a74ca5018460e4"));
-      console.log("PENDING TXSSSSSSSSSSSSSSSS",this.pendingTxsss )
+      // console.log("PENDING TXSSSSSSSSSSSSSSSS",this.pendingTxsss )
+      // this.pendingTxsss = (await this.conn.getPendingTx("0x71eecdf6414eda0be975c2b748a74ca5018460e4"));
+      // console.log("PENDING TXSSSSSSSSSSSSSSSS",this.pendingTxsss )
     },
     async handleUnDelegateClick() {
       this.updateDelegationPopup(true);
@@ -409,6 +410,51 @@ async handleDelegateClick() {
         // console.log(this.loggedAddress,"ADDDDDDDD");
         await this.buildTx("delegate", argsArray, 0x13);
     },
+
+    checkPendingTxs: async function () {
+  try {
+    // Fetch the latest pending transactions
+    this.txgenerated = await this.conn.getPendingTx({
+      address: this.loggedAddress // Assuming 'address' is a required field
+    });
+
+    let delegateFound = false;
+
+    // Check if transactions are present and valid
+    if (this.txgenerated && this.txgenerated.transactions ) {
+      for (let tx of this.txgenerated.transactions) {
+        if (tx.type === "delegate" && tx.to === POOL_ADDRESS) {
+          console.log("Delegate transaction found:", tx);
+          delegateFound = true;
+          this.updateDelegateeCheck(true);
+          console.log("updateDelegateeCheck",this.myDelegatee);
+          break; // Exit loop once a matching delegate transaction is found
+        }
+      }
+
+      // If no matching delegate transaction is found, clear the interval
+      if (!delegateFound) {
+        console.log("No matching delegate transaction found, clearing interval.");
+        this.updateDelegationPopup(false);
+        console.log(this.delegationPopup)
+      }
+    } else {
+      console.log("No transactions or response is invalid, clearing interval.");
+            console.log("status", this.delegationPopup);
+            
+      this.updateDelegationPopup(false);
+            console.log("status", this.delegationPopup);
+
+    }
+  } catch (error) {
+    console.error("Error fetching pending transactions:", error);
+    this.updateDelegationPopup(false);
+            console.log(this.delegationPopup)
+
+  }
+
+    },
+
   buildTx: async function (method, args, TxType, amountInt = 0) {
       // console.log("MINING REWARD Z KOMPONENTU DELEGATION",this.miningReward);
       // console.log("APY Z KOMPONENETU DELEGATION",this.apy);
@@ -417,15 +463,32 @@ async handleDelegateClick() {
       const windowFeatures = "left=100,top=100,width=400,height=700";
       var popup = window.open("", "_blank",windowFeatures);
 
-       const popupCheckInterval = setInterval(() => {
-        if (this.delegationPopup && !popup.closed) {
-          console.log("Popup is open");
-        } else {
-          console.log("Popup is closed");
-          clearInterval(popupCheckInterval);
-          this.updateDelegationPopup(false);
+       const popupCheckInterval = setInterval(async () => {
+  if (this.delegationPopup && !popup.closed) {
+    console.log("Popup is open");
+  } else {
+    console.log("Popup is closed");
+    clearInterval(popupCheckInterval);
+    await this.checkPendingTxs();
+    if (this.delegationPopup === true) {
+      const pendingTxsInterval = setInterval(async () => {
+
+
+        await this.checkPendingTxs();
+
+        if (this.delegationPopup === false) {
+          clearInterval(pendingTxsInterval);
         }
-      }, 1000);
+
+      }, 5000);
+    }
+
+    // setInterval(this.checkPendingTxs, 5000);
+    // this.updateDelegationPopup(false); //moment kiedy zamykamy popupa
+  }
+}, 1000);
+
+
       this.generating = true;
 
       console.log(this.generating,"generating");
@@ -450,6 +513,10 @@ async handleDelegateClick() {
         const addre = "0x71eecdf6414eda0be975c2b748a74ca5018460e4"; //TODO: change to the address of the pool
         this.epoch = (await this.conn.getEpoch()).epoch;
         this.nonce = (await this.conn.getBalance(this.loggedAddress)).nonce + 1;
+// this.txgenerated = await this.conn.getPendingTx({
+//   address: this.loggedAddress, // Assuming 'address' is a required field
+//   // Include other properties that might be required by the api.TransactionsArgs structure
+// });        console.log("txgenerated", this.txgenerated.transactions);
         console.log("nonce", this.nonce);
         console.log("lolz",this.epoch);
         const tx = proto.encodeProtoTransaction({
@@ -708,8 +775,9 @@ async handleDelegateClick() {
 } */
 
 #wrapper {
+  width: 100vw;
   display: flex;
-  justify-content: center;  
+  align-items: center;  
   height: 90vh;
   flex-direction: column;
   font-family: "Lexend Exa", sans-serif;
@@ -812,20 +880,26 @@ async handleDelegateClick() {
 }
 
 #countdowns {
+  width: 550px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 2rem;
+  border-radius: 10px;
+  background-color: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  padding-top:20px;
+  padding-bottom:20px;
 }
 
 #validation {
-  width: 60%;
+
+  width: 80%;
   display: flex;
   justify-content: space-between;
   flex-direction: row;
 }
 #titles{
-  width: 60%;
+  width: 80%;
   display: flex;
   justify-content: space-between;
   flex-direction: row;
@@ -883,10 +957,15 @@ button:disabled {
   /* transition: .4s; */
 }
 #prediction {
-  height: 40%;
+  height: 400px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  border-radius: 10px;
+  background-color: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  justify-content: center;
+  width: 550px;
 }
 #title {
   display: flex;
@@ -897,7 +976,7 @@ button:disabled {
 }
 #stakeApy,
 #values {
-  width: 60%;
+  width: 80%;
   display: flex;
   justify-content: space-between;
 }
@@ -909,9 +988,9 @@ button:disabled {
   color: grey;
 }
 #calculation {
+  width: 60%;
   display: flex;
   flex-direction: column;
-  width: 50%;
   margin-top: 2rem;
   justify-content: space-between;
 }

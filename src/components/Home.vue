@@ -17,8 +17,10 @@
     </div>
   </div>
 
+
   <div id="globeContainer">
     <div id="globeViz"></div>
+
   </div>
   <button class="button" type="button" @click="handleRefreshClick">REFRESH</button>
   <!-- <div class="outer-reload" id="outer-reload">
@@ -60,6 +62,7 @@ html {
     height: 100vh;
 }
 #homewrapper{
+    width: 100vw;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -90,6 +93,7 @@ html {
     border-radius: 50%;
     margin: 1.4vh;
 
+
 }
 
 #dot-online {
@@ -102,7 +106,6 @@ html {
 
 #status-synchronizing {
     color: var(--synchronizing);
-
 }
 
 #dot-synchronizing {
@@ -305,22 +308,24 @@ html {
 
 #hoverStats{
   font-family: 'Lexend Exa', sans-serif;
-  background-color: #f0f2f5;
+  background-color: #fff;
   padding-right:10px;
   padding-left:10px;
   color:#131313;
+  border-radius: 7px;
 }
 
 #hoverTitle{
   display: flex;
   justify-content: center;
   align-items: center;
+  color:#0A66C2;
 }
 
 
 </style>
 
-<script>
+<script >
 // import { Globe } from 'globe.gl';
 import axios from 'axios';
 //import Globe from 'globe.gl';
@@ -341,13 +346,15 @@ export default {
   },
   computed: {
     ...mapState({
-      geoJsonData: (state) => state.geoJsonData,
+      // geoJsonData: (state) => state.geoJsonData,
+      globeInicialized: (state) => state.globeInicialized
     })
     
   },
   
   mounted() {
       this.initGlobe();
+      // this.initGlobe2();
       this.countTransactions();
       // this.loadMapData();
       // this.loadFontData();
@@ -364,17 +371,25 @@ export default {
   this.cleanupGlobe();
 },
   methods: {
+    cleanUpWorld(){
+      const globeVizElement = document.getElementById('globeViz');
+while (globeVizElement.firstChild) {
+  globeVizElement.removeChild(globeVizElement.firstChild); // Removes all child elements
+}
+
+  ;
+    },
     cleanupGlobe() {
     // Check if the globe is initialized before attempting to clean up
       // Pause animation and clear data layers
       this.world.pauseAnimation();
       this.world.pointsData([]);
       this.world.arcsData([]);
-      this.world.polygonsData([]);
+      // this.world.polygonsData([]);
       this.world.pathsData([]);
       this.world.hexBinPointsData([]);
       this.world.hexPolygonsData([]);
-      this.world.labelsData([]);
+      // this.world.labelsData([]);
       this.world.customLayerData([]);
     },
     // async loadFontData() {
@@ -402,6 +417,13 @@ export default {
     //       throw error;
     //     });
     // },
+    async initGlobe2(){
+      console.log("initglobe2 called")
+      this.world = this.globeInicialized
+      (document.getElementById('globeViz'))
+       .pointOfView({ lat: 51, lng: 9, altitude: 1.69 }) // aim at Germany
+      console.log(this.world)
+    },
     initGlobe() {
       console.log('Initializing globe')
       const width = document.documentElement.clientWidth * 0.65;
@@ -413,7 +435,7 @@ export default {
         .height(height)
          .globeImageUrl(texture)
          //.globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
-        .pointOfView({ lat: 51, lng: 9, altitude: 1.6 }) // aim at Germany
+        .pointOfView({ lat: 51, lng: 9, altitude: 1.69 }) // aim at Germany
         .polygonAltitude(0.05)
         .polygonCapColor(() => '#056CF2')
         .polygonSideColor(() => 'rgba(0, 0, 0, 0)')
