@@ -445,7 +445,7 @@ while (globeVizElement.firstChild) {
         .height(height)
          .globeImageUrl(texture)
          //.globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
-        .pointOfView({ lat: 51, lng: 9, altitude: 1.69 }) // aim at Germany
+        .pointOfView({ lat: 54, lng: 18, altitude: 1.69 }) // aim at Germany
         .polygonAltitude(0.05)
         .polygonCapColor(() => '#056CF2')
         .polygonSideColor(() => 'rgba(0, 0, 0, 0)')
@@ -472,16 +472,16 @@ while (globeVizElement.firstChild) {
             desc: 'Shared  node'
 
           },
-          // { 
-          //   lat: 52.5,
-          //   lng: 19,
-          //   text: 'Poland',
-          //   altitude: 0.06,
-          //   dotradius: 1.2,
-          //   size: 1.2,
-          //   color: '#000000',
-          //   desc: 'Mining  node'
-          // }
+          { 
+            lat: 52.5,
+            lng: 19,
+            text: 'Poland',
+            altitude: 0.06,
+            dotradius: 1.2,
+            size: 1.2,
+            color: '#000000',
+            desc: 'Mining  node'
+          }
         ]).labelLat(d => d.lat)
         .labelLng(d => d.lng)
         .labelText(d => d.text)

@@ -67,7 +67,6 @@ h1{
 
 @media (max-width: 768px) {
 #aboutwrapper{
-  overflow-y: scroll;
   padding-bottom: 10vh;
 }
 
@@ -77,11 +76,15 @@ h1{
 .section{
     width: 80%;
     font-size: 1.2rem;
-    padding: 8px;
+    padding: 15px;
+      overflow-y: scroll;
+      max-height: 140px;
+
 }
 h1{
   font-size: 1.7rem;
-  margin-bottom: 2px;
+  margin-bottom: 5px;
+  margin-top:0px;
 }
 
 }

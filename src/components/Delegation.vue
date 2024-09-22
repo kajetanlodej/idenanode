@@ -3,7 +3,7 @@
   <div class="inside-wrapper">
     <div id="prediction">
       <div id="title">
-        <h3>REWARDS CALCULATION</h3>
+        <h3>REWARDS PREDICTION</h3>
       </div>
       <div id="stakeApy">
         <div>Stake, iDNA</div>
