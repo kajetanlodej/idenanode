@@ -1,8 +1,9 @@
 <template>
 <div id ="aboutwrapper">
-    <div class="section">
+    <div class="section" id="first-section">
     <h1>Services</h1>
-    <span>Offering two primary services, idenanode.com provides both shared node and mining node for delegation. The shared node service connects users to the Idena blockchain, enabling network participation without the need to manage a node individually. Meanwhile, the mining node for delegation service allows users to delegate their identity, ensuring active participation in securing the network.</span>
+    <span>
+Idenanode.com offers two main services: shared node access, connecting users to the Idena blockchain without managing their own node, and mining node delegation, enabling users to delegate their identity for network security participation.</span>
 
 </div>
     <div class="section">
@@ -15,7 +16,8 @@
     </div>
     <div class="section" style="margin-bottom: 0px;">
     <h1>Disclaimer</h1>
-    <span>No keys are transferred from the delegatees to the pool. Although please note that the pool owner has the authority to manage delegated identities, which includes the possibility of terminating your identity and resulting in the loss of your stake. Therefore, it's crucial to delegate to pool owners you trust. Should you wish to change your delegation, you can do so in the next epoch.</span>
+    <span>
+No keys are transferred to the pool, but the owner can manage delegated identities, including terminating them and risking your stake. Delegate only to trusted pools. You can change your delegation in the next epoch.</span>
     </div>
 </div>
 </template>
@@ -26,13 +28,13 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 90vh;
+    height: 93.2vh;
+    width: 100vw;
     flex-direction: column;
     font-family: 'Lexend Exa', sans-serif;
     /* padding-bottom: 50px; */
 }
-#access{
-}
+
 
 a {
   color: #0866ff;
@@ -49,7 +51,7 @@ a:active {
 }
 
 .section{
-    width: 40%;
+    width: 800px;
     padding: 20px;
     border-radius: 10px;
     background-color: #fff;
@@ -60,6 +62,28 @@ a:active {
 h1{
     margin-bottom: 10px;
     margin-top: 0px;
-    font-size: 3rem
+    font-size: 2.5rem
 }
+
+@media (max-width: 768px) {
+#aboutwrapper{
+  overflow-y: scroll;
+  padding-bottom: 10vh;
+}
+
+/* #first-section{
+  margin-top: 100px;
+} */
+.section{
+    width: 80%;
+    font-size: 1.2rem;
+    padding: 8px;
+}
+h1{
+  font-size: 1.7rem;
+  margin-bottom: 2px;
+}
+
+}
+
 </style>

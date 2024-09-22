@@ -47,11 +47,12 @@ import Globe from 'globe.gl';
                 <!-- STATUS Navigation Element with both text and SVG -->
         <RouterLink to="/">
           <span class="nav-text status-text">STATUS</span>
-          <svg class="nav-icon status-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+          <!-- <svg class="nav-icon status-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
             viewBox="0 0 16 16">
               <path d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L2 8.207V13.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V8.207l.646.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293zM13 7.207V13.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V7.207l5-5z"/>
-          </svg>
+          </svg> -->
         </RouterLink>
+        
          <!-- DELEGATION Navigation Element with both text and SVG -->
         <RouterLink to="/delegation">
           <span class="nav-text delegation-text">DELEGATION</span>
@@ -73,6 +74,8 @@ import Globe from 'globe.gl';
             <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>
           </svg>
         </RouterLink>
+
+
       </nav>
       
       <Identity :identity="identity" @signOut="signOut" @signIn="signIn" />
@@ -379,7 +382,7 @@ export default {
         console.log(this.loggedAddress,"LOGGGGGGEDADDD");
         // localStorage.delegatee = this.identity.delegatee;
         // console.log("identitySTORAGEDELEGATEE", localStorage.delegatee);
-        this.updateDelegatee(this.identity.delegatee);
+        this.updateDelegatee( await this.identity.delegatee);
         
         this.stake = Number.parseFloat(this.identity.stake).toFixed(2);
         console.log("stakes", this.stake);
@@ -753,7 +756,8 @@ export default {
         <div id="numberOfKeys">
           API keys sold:
         <span id="totalSold"> ${this.transactionCount} in total</span>
-        <span id="thisEpochSold">${this.thisEpochTransactionCount} this epoch</span>  
+        <span id="thisEpochSold">${this.thisEpochTransactionCount} this epoch</span> 
+        <span>buy access via official shared node marketplace </span> 
     </div>
         
         </div>
@@ -1003,7 +1007,7 @@ export default {
 
 #wrapper{
   width: 100vw;
-  height: 100vh;
+  height: 100vh - 65px;
   display: flex;
   flex-direction: column;
 }
@@ -1172,7 +1176,7 @@ display: flex; flex-direction: row; height: 100%; align-items: center; justify-c
     display: none;
   }
   .logo{
-    margin-right: 20px;
+    margin-right: 0px;
   }
   #media{
     flex-direction: column; padding-left: 12px; padding-right: 12px;
@@ -1196,20 +1200,21 @@ display: flex; flex-direction: row; height: 100%; align-items: center; justify-c
   .delegation-icon{
     display: inline-block;
     margin-right: 20px;
-
+    margin-top: 5px;
   }
   .about-icon{
     display: inline-block;
     margin-right: 20px;
+    margin-top: 5px;
 
   }
   i{
     margin-right: 0px;
   }
 
-  .logo{
+  /* .logo{
     display: none;
-  }
+  } */
 }
 
 .menu-icon {

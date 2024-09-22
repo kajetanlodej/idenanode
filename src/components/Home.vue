@@ -66,7 +66,7 @@ html {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 90vh;
+    height: 93.2vh;
     flex-direction: column;
     font-family: 'Lexend Exa', sans-serif;
 }
@@ -211,7 +211,6 @@ html {
         margin-bottom: 5px;
         margin-top: 2px;
         font-size: 1.4em;
-        
     }
 
     #labelToggle {
@@ -226,6 +225,7 @@ html {
     .dot {
         margin: 10px;
     }
+
 }
 
 @media screen and (max-height: 865px) {
@@ -259,7 +259,16 @@ html {
         border-radius: 50%;
         margin: 1.4vh;
     }
+    /* #homewrapper{
+    padding-bottom: 15vh;
+} */
 
+}
+@media (max-width: 768px) {
+  #homewrapper{
+      padding-bottom: 10vh;
+
+}
 }
 
 .button {
@@ -313,6 +322,7 @@ html {
   padding-left:10px;
   color:#131313;
   border-radius: 7px;
+  border: 2px solid #0A66C2;
 }
 
 #hoverTitle{
@@ -426,7 +436,7 @@ while (globeVizElement.firstChild) {
     },
     initGlobe() {
       console.log('Initializing globe')
-      const width = document.documentElement.clientWidth * 0.65;
+      const width = document.documentElement.clientWidth * 0.8;
       const height = document.documentElement.clientHeight * 0.6;
 
       this.world = Globe({ animateIn: false, waitForGlobeReady: true })
@@ -488,10 +498,10 @@ while (globeVizElement.firstChild) {
         <span id="totalSold"> ${this.transactionCount} in total</span>
         <span id="thisEpochSold">${this.thisEpochTransactionCount} this epoch</span>  
     </div>
-        
         </div>
       `)
         .backgroundColor('#f0f2f5');
+        
 
     //   const globeMaterial = this.world.globeMaterial();
     //   globeMaterial.bumpScale = 10;

@@ -1,5 +1,6 @@
 <template>
-  <div id="wrapper">
+  <div id="wrapper-delegation">
+  <div class="inside-wrapper">
     <div id="prediction">
       <div id="title">
         <h3>REWARDS CALCULATION</h3>
@@ -12,9 +13,10 @@
         <div>
           {{ amountValue }}
         </div>
-        <div>
-          {{amountValue? parseFloat(this.apy * 0.9).toFixed(2): 0}}
-        </div>
+<div>
+  {{amountValue ? (isNaN(parseFloat(this.apy * 0.9)) ? '0.00' : parseFloat(this.apy * 0.9).toFixed(2)) : '0'}}
+</div>
+
       </div>
       <div id="calculation">
         <!-- 90% of the rewards are distributed to the delegators. The remaining 10% are distributed to the pool owner. -->
@@ -115,7 +117,9 @@
         <span id="clock">{{ this.validationCountdown}}</span>
       </div>
       
-    </div>  
+    </div>
+
+    </div>
 
     <!-- <div id="countdown">
       <span id="clock">{{ countdown }}</span>
@@ -774,15 +778,16 @@ async handleDelegateClick() {
   color: white;
 } */
 
-#wrapper {
+#wrapper-delegation {
   width: 100vw;
   display: flex;
   align-items: center;  
-  height: 90vh;
+  height: 93.2vh;
   flex-direction: column;
   font-family: "Lexend Exa", sans-serif;
   color: #131313;
   justify-content: center;
+
 }
 
 #delegation {
@@ -791,7 +796,7 @@ async handleDelegateClick() {
   align-items: center;
   justify-content: center;
   font-size: 1.5rem;
-  height: 30vh;
+  height: 250px;
   font-weight: 600;
   color: #131313;
 }
@@ -880,7 +885,7 @@ async handleDelegateClick() {
 }
 
 #countdowns {
-  width: 550px;
+  width: 800px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -965,7 +970,8 @@ button:disabled {
   background-color: #fff;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   justify-content: center;
-  width: 550px;
+  width: 800px;
+
 }
 #title {
   display: flex;
@@ -1074,6 +1080,49 @@ a:active {
   background: rgba(0, 0, 0, .08);
   color: rgba(0, 0, 0, .3);
 }
+h3{
+  margin-top: 0px;
+  margin-bottom: 40px;
+}
+@media (max-width: 768px) {
+#prediction{
+  width: 100%;
+  height: 320px;
+}
+#values {
+  font-size: 2.4rem;
+  font-weight: 600;
+}
+.inside-wrapper{
+  width: 80%;
+  font-size: 1.2rem;
+  padding-bottom: 10vh;
+}
+h3{
+  font-size: 1.8rem;
+  margin-top: 0px;
+  margin-bottom: 20px;
+}
+
+#calculation{
+  width: 80%;
+}
+
+#total{
+  font-size: 1.3rem;
+}
+#countdowns{
+  width: 100%;
+  font-size: 1.1rem;
+}
+#delegation{
+  height: 150px;
+}
+
+#clock{
+  font-size: 1.7rem; }
+}
+
 .loader {
     width: 24px;
     height: 24px;
