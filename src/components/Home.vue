@@ -16,30 +16,10 @@
       <span id="status-offline">Offline</span>
     </div>
   </div>
-
-
   <div id="globeContainer">
     <div id="globeViz"></div>
-
   </div>
   <button class="button" type="button" @click="handleRefreshClick">REFRESH</button>
-  <!-- <div class="outer-reload" id="outer-reload">
-    <div id="outer-icon">
-      <input id="reload" type="image" src="/content/refresh-white.png" alt="refresh-button">
-    </div>
-    <div id="status-text">
-      <span id="labelToggle">NODE STATUS</span>
-    </div>
-  </div> -->
-
-
-  <!-- <div id="sold-keys">
-    <span id="number-sold-text">API keys sold:&nbsp;</span>
-    <div id="numberOfKeys">
-      <span id="totalSold"> {{ transactionCount }} in total</span>
-      <span id="thisEpochSold">{{ thisEpochTransactionCount }} this epoch</span>  
-    </div>
-  </div> -->
 </div>
   </template>
   
@@ -92,8 +72,6 @@ html {
     width: 25px;
     border-radius: 50%;
     margin: 1.4vh;
-
-
 }
 
 #dot-online {
@@ -205,7 +183,7 @@ html {
         width: 90vw;
         min-height: 11vh;
         overflow: hidden;
-        flex-direction: column;
+        /* flex-direction: column; */
         align-items: center;
         margin: 0px;
         margin-bottom: 5px;
@@ -245,12 +223,12 @@ html {
         order: -4;
         font-size: 1.2em;
         margin:0px;
-
     }
 
     .status-example{
         flex-direction: column;
     }
+
     .dot{
         min-width: 25px;
         min-height: 25px;
@@ -259,16 +237,12 @@ html {
         border-radius: 50%;
         margin: 1.4vh;
     }
-    /* #homewrapper{
-    padding-bottom: 15vh;
-} */
 
 }
 @media (max-width: 768px) {
   #homewrapper{
       padding-bottom: 10vh;
-
-}
+  }
 }
 
 .button {
@@ -336,61 +310,30 @@ html {
 </style>
 
 <script >
-// import { Globe } from 'globe.gl';
 import axios from 'axios';
-//import Globe from 'globe.gl';
 import Globe from 'globe.gl';
 import texture from '/src/assets/pobrane-jasne.png';
-import { mapState } from 'vuex'
+import { POOL_ADDRESS, NODE_URL, NODE_KEY } from '@/config';
+import { Conn } from "@/connection";
 
 export default {
-  data() {
+  data: function() {
+    const conn = new Conn(this.connected, NODE_URL, NODE_KEY);
+
     return {
-      //reloadImageUrl: '/content/refresh-white.png',
-      transactionCount: 0,
-      thisEpochTransactionCount: 0,
-      labelfont: null,
-      world: null,
-      globeInitialized: false
+      conn,
     };
   },
-  computed: {
-    ...mapState({
-      // geoJsonData: (state) => state.geoJsonData,
-      globeInicialized: (state) => state.globeInicialized
-    })
-    
-  },
-  
   mounted() {
       this.initGlobe();
-      // this.initGlobe2();
-      this.countTransactions();
-      // this.loadMapData();
-      // this.loadFontData();
-      // Initialize the globe after loading the data
-      // this.initGlobe();
-      // Other initialization logic
       this.handleRefreshClick();
-      this.loadTransactionCount();
   },
   beforeUnmount() {
-  //TODO: CHECK IF WORLD IS INITIAIZED AND ONLY AFTER THAT DESTROY
-  // This hook is called right before the component is unmounted
   console.log('Cleaning globe before unmounting component');
   this.cleanupGlobe();
 },
   methods: {
-    cleanUpWorld(){
-      const globeVizElement = document.getElementById('globeViz');
-while (globeVizElement.firstChild) {
-  globeVizElement.removeChild(globeVizElement.firstChild); // Removes all child elements
-}
-
-  ;
-    },
     cleanupGlobe() {
-    // Check if the globe is initialized before attempting to clean up
       // Pause animation and clear data layers
       this.world.pauseAnimation();
       this.world.pointsData([]);
@@ -402,49 +345,15 @@ while (globeVizElement.firstChild) {
       // this.world.labelsData([]);
       this.world.customLayerData([]);
     },
-    // async loadFontData() {
-    //   return axios.get('/src/assets/font.json')
-    //     .then(response => {
-    //       // if (!response.ok) {
-    //       //   throw new Error('Network response was not ok');
-    //       // }
-    //       this.labelfont = response.data;
-    //       this.world.labelTypeFace(this.labelfont);
-    //     })
-    //     .catch(error => {
-    //       console.error('Error fetching labelfont:', error);
-    //       throw error;
-    //     });
-    // },
-    // loadMapData() {
-    //   return axios.get('/src/assets/ne_110m_admin_0_countries.geojson')
-    //     .then(res => {
-    //       const countries = res.data;
-    //       this.world.polygonsData(countries.features);
-    //     })
-    //     .catch(error => {
-    //       console.error('Error fetching map data:', error);
-    //       throw error;
-    //     });
-    // },
-    async initGlobe2(){
-      console.log("initglobe2 called")
-      this.world = this.globeInicialized
-      (document.getElementById('globeViz'))
-       .pointOfView({ lat: 51, lng: 9, altitude: 1.69 }) // aim at Germany
-      console.log(this.world)
-    },
     initGlobe() {
       console.log('Initializing globe')
       const width = document.documentElement.clientWidth * 0.8;
       const height = document.documentElement.clientHeight * 0.6;
-
       this.world = Globe({ animateIn: false, waitForGlobeReady: true })
         (document.getElementById('globeViz'))
         .width(width)
         .height(height)
          .globeImageUrl(texture)
-         //.globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
         .pointOfView({ lat: 54, lng: 18, altitude: 1.69 }) // aim at Germany
         .polygonAltitude(0.05)
         .polygonCapColor(() => '#056CF2')
@@ -458,7 +367,7 @@ while (globeVizElement.firstChild) {
             altitude: 0.059,
             dotradius: 1.2,
             size: 1.2,
-            color: '#0000001', // Set the color to black (#000000) for the first label
+            color: '#0000001',
             desc: 'Shared  node'
           },
           { //Background
@@ -470,7 +379,6 @@ while (globeVizElement.firstChild) {
             size: 1.25,
             color: '#000000',
             desc: 'Shared  node'
-
           },
           { 
             lat: 52.5,
@@ -479,6 +387,16 @@ while (globeVizElement.firstChild) {
             altitude: 0.06,
             dotradius: 1.2,
             size: 1.2,
+            color: '#0000002',
+            desc: 'Mining  node'
+          },
+          { //Background
+            lat: 52.4,
+            lng: 19,
+            text: 'Poland',
+            altitude: 0.059,
+            dotradius: 1.2,
+            size: 1.25,
             color: '#000000',
             desc: 'Mining  node'
           }
@@ -493,42 +411,10 @@ while (globeVizElement.firstChild) {
         .labelLabel(d => `
         <div id="hoverStats">
         <div id="hoverTitle"><b>${d.desc}</b></div>
-        <div id="numberOfKeys">
-          API keys sold:
-        <span id="totalSold"> ${this.transactionCount} in total</span>
-        <span id="thisEpochSold">${this.thisEpochTransactionCount} this epoch</span>  
-    </div>
         </div>
       `)
         .backgroundColor('#f0f2f5');
-        
-
-    //   const globeMaterial = this.world.globeMaterial();
-    //   globeMaterial.bumpScale = 10;
-    //   new THREE.TextureLoader().load('/src/assets/pobrane-jasne.png', texture => {
-    //   globeMaterial.specularMap = texture;
-    //   globeMaterial.specular = new THREE.Color('grey');
-    //   globeMaterial.shininess = 15;
-    // });
-
-
-
-      // fetch('/src/assets/font.json')
-      //   .then(response => {
-      //     if (!response.ok) {
-      //       throw new Error('Network response was not ok');
-      //     }
-      //     return response.json();
-      //   })
-      //   .then(data => {
-      //     this.labelfont = data;
-      //     this.world.labelTypeFace(this.labelfont);
-      //   })
-      //   .catch(error => {
-      //     console.error('Error fetching labelfont:', error);
-      //   });  
-
-          // this.world.polygonsData(this.geoJsonData);
+    
       fetch('/src/assets/simplifiedmap.geojson')
         .then(res => res.json())
         .then(countries => {
@@ -539,108 +425,7 @@ while (globeVizElement.firstChild) {
         });
         
     },
-    // loadFontData() {
-    //   axios.get('/src/assets/font.json')
-    //     .then(response => {
-    //       if (response && response.data) {
-    //         this.labelfont = response.data;
-    //         this.world.labelTypeFace(this.labelfont);
-    //       }
-    //     })
-    //     .catch(error => {
-    //       console.error('Error fetching labelfont:', error);
-    //     });
-    // },
-//     loadMapData() {
-//     fetch('./assets/simplifiedmap.geojson')
-//     .then(res => res.json())
-//     .then(countries => {
-//       if (this.world) {
-//         this.world.polygonsData(countries.features);
-//       } else {
-//         console.error('Globe not initialized');
-//       }
-//     })
-//     .catch(error => {
-//       console.error('Error fetching map data:', error);
-//     });
-// },
-async getEpochValidationTime() {
-    try {
-      const currentEpoch = await axios.get("https://api.idena.io/api/Epoch/Last");
-      //const currentValidationTime = currentEpoch.data.result.validationTime;
-      const currentEpochNumber = currentEpoch.data.result.epoch;
-      const lastEpochNumber = currentEpochNumber - 1;
-      const lastEpoch = await axios.get("https://api.idena.io/api/Epoch/" + lastEpochNumber)
-      const lastValidationTime = lastEpoch.data.result.validationTime;
-      console.log(lastValidationTime);
-      return new Date(lastValidationTime);
-    } catch (error) {
-      this.error = "Error fetching epoch validation time: " + error.message;
-      throw error;
-    }
-  },
-  async countTransactions() {
-try {
-  this.error = null;
-  const validationTime = await this.getEpochValidationTime();
-  console.log("Validation Time:", validationTime);
-  let thisEpochTransactionCount = 0;
-  let continuationToken = null;
-
-  for (let i = 0; i < 3; i++) {
-    console.log("Iteration:", i + 1);
-    let apiUrl = "https://api.idena.io/api/Address/0x344a09ec5b9b5debc5a889837c50c66c8a78f04d/Txs?limit=100";
-    if (continuationToken) {
-      apiUrl += `&continuationToken=${continuationToken}`;
-    }
-    const response = await axios.get(apiUrl);
-    const transactions = response.data.result;
-    console.log("Transactions:", transactions);
-
-    for (const transaction of transactions) {
-      const txTimestamp = new Date(transaction.timestamp);
-      if (txTimestamp > validationTime) {
-        const amount = parseFloat(transaction.amount);
-        if ([0.01, 1, 3, 5].includes(amount)) {
-          thisEpochTransactionCount++;
-        }
-      }
-    }
     
-    if (response.data.continuationToken) {
-      continuationToken = response.data.continuationToken;
-    } else {
-      console.log("No continuation token found. Exiting loop.");
-      break;
-    }
-    //dont go into next iteration if there are < 100 transactions in 100 element batch
-    if (thisEpochTransactionCount < (i+1) * 100 ){
-      break;
-    }
-  }
-
-  this.thisEpochTransactionCount = thisEpochTransactionCount;
-  console.log("Total transactions:", this.thisEpochTransactionCount);
-
-} catch (error) {
-  this.error = "Error counting transactions: " + error.message;
-}
-},
-
-
-    loadTransactionCount() {
-      const apiUrl = 'https://api.idena.io/api/address/0x344a09ec5b9b5debc5a889837c50c66c8a78f04d/txs/count';
-      axios.get(apiUrl)
-        .then(response => {
-          if (response && response.data && response.data.result) {
-            this.transactionCount = response.data.result - 59;
-          }
-        })
-        .catch(error => {
-          console.error('Error fetching transaction count:', error);
-        });
-    },
     makeSyncingRequest() {
       const rpcEndpoint = 'https://idenanode.com';
       const payload = {
@@ -657,59 +442,57 @@ try {
           throw error;
         });
     },
+    makeSyncingRequestMining: async function(){
+      return (await this.conn.getIdentity(POOL_ADDRESS));
+    },
     handleRefreshClick() {
-         //world.labelColor(() => 'rgba(0, 0, 0, 1)');
-
       this.world.labelColor(d => {
         if (d.text === 'Germany' && d.color !== '#000000') {
-          return 'rgba(0, 0, 0, 0.6)'; // Keep the shadow 0.6 opacity on refresh
+          return 'rgba(0, 0, 0, 1)'; // Keep the shadow 0.6 opacity on refresh
         }
       });
-
+      
       this.makeSyncingRequest()
         .then(data => {
           console.log(data);
-          // Determine color based on 'syncing' field
           const labelColor = data.result.syncing ? '#FF681E' : '#00FF00';
-          // Update label colors
+          (this.world.labelsData())[0].color = labelColor;
+
           this.world.labelColor(d => {
             if (d.text === 'Germany' && d.color !== '#000000') {
-              return 'rgba(0, 0, 0, 0.6)'; // Keep the 'Germany' label black
+              return 'rgba(0, 0, 0, 1)'; 
             } else if (d.text === 'Germany') {
-              return labelColor; // Change color for the 'Another Label'
+                const labelColorMining = data.online ? '#00FF00' : '#FF000D';
+               (this.world.labelsData())[2].color = labelColorMining;
+              return labelColor; 
             } else {
-              return d.color; // Keep other labels' color as is
+              return d.color;
             }
           });
         })
         .catch(error => {
           console.error('Error:', error);
-          // Offline color
           const offlineColor = '#FF000D';
-
-          // Update label colors
           this.world.labelColor(d => {
             if (d.text === 'Germany' && d.color !== '#000000') {
-              return 'rgba(0, 0, 0, 0.6)'; // Keep the 'Germany' label black
+              return 'rgba(0, 0, 0, 1)'; // Keep the 'Germany' label black
             } else if (d.text === 'Germany') {
+              (this.world.labelsData())[2].color = '#000000';
               return offlineColor; // Change color for the 'Another Label'
             } else {
               return d.color; // Keep other labels' color as is
             }
           });
         });
-    },
-    handleReloadClick() {
-      // Implement handleReloadClick function here
-    },
-    resizeGlobe() {
-      // Implement resizeGlobe function here
+      this.makeSyncingRequestMining()
+      .then (data => {
+        console.log("WYNIKKKKKKKKKKKKKKKKK",data.online)
+        const labelColor = data.online ? '#00FF00' : '#FF000D';
+        console.log("LABEL COLOR", labelColor);
+        (this.world.labelsData())[2].color = labelColor;
+        console.log("zmieniono kolor mining")
+      })
     },
   },
-  watch: {
-    transactionCount() {
-      // Handle any side effects when transaction count changes
-    }
-  }
 };
 </script>

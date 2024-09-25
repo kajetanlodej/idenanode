@@ -1,10 +1,8 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
 import Identity from "./components/Identity.vue";
 import { Conn } from "./connection.js";
 import {
-  // ART_GENERATORS,
   CALLBACK_URL,
   NODE_URL,
   NODE_KEY,
@@ -33,7 +31,6 @@ import Globe from 'globe.gl';
 <template>
   <div id="wrapper">
   <header >
-  <!-- <button @click="sendDelegateTx">Sign Out</button> -->
       <nav>
         <RouterLink to="/" style="transition: none; 
         -webkit-transform: scale(1) ;
@@ -43,17 +40,10 @@ import Globe from 'globe.gl';
           transform: scale(1) ;">
           <img src="./assets/logo.png" class="logo" />
         </RouterLink>
-        <!-- STATUS Navigation Element with both text and SVG -->
-                <!-- STATUS Navigation Element with both text and SVG -->
         <RouterLink to="/">
           <span class="nav-text status-text">STATUS</span>
-          <!-- <svg class="nav-icon status-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-            viewBox="0 0 16 16">
-              <path d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L2 8.207V13.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V8.207l.646.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293zM13 7.207V13.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V7.207l5-5z"/>
-          </svg> -->
         </RouterLink>
         
-         <!-- DELEGATION Navigation Element with both text and SVG -->
         <RouterLink to="/delegation">
           <span class="nav-text delegation-text">DELEGATION</span>
           <svg class="nav-icon delegation-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
@@ -65,7 +55,6 @@ import Globe from 'globe.gl';
           </svg>
         </RouterLink>
         
-        <!-- ABOUT Navigation Element with both text and SVG -->
         <RouterLink to="/about">
           <span class="nav-text about-text">ABOUT</span>
           <svg class="nav-icon about-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
@@ -80,52 +69,15 @@ import Globe from 'globe.gl';
       
       <Identity :identity="identity" @signOut="signOut" @signIn="signIn" />
       <div id = "media" class="media">
-        <i class="fa fa-github"></i>
+        <a href="https://github.com/kajetanlodej/idenanode" target="_blank">
+    <i class="fa fa-github"></i>
+</a>
         <i class="fa fa-telegram" ></i>
       </div>
-
-      
   </header>
-
   <RouterView/>
-
 </div>
-
-  <!-- <div id="wrapper">
-    <div id="footer">
-      <div id ="navigation">
-      <nav id = "nav">
-        <button class="btn btn-info" @click="$router.push('/')">HOME</button>
-        <button class="btn btn-info" @click="$router.push('delegation')">DELEGATION</button>
-      </nav>
-    </div>
-    <Identity :identity="identity" @signOut="signOut" @signIn="signIn" />
-    </div>
-    <div id = "router">
-      <router-view></router-view>
-    </div>  
-  </div> -->
 </template>
-
-
-
-
-<!-- <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
-    </div>
-  </header>
-
-  <RouterView />
-</template> -->
 <script>
 import { mapActions } from 'vuex';
 import texture from '/src/assets/pobrane-jasne.png';
@@ -137,16 +89,10 @@ export default {
 
   components: {
     Identity,
-    // iNFT,
-    // BCollapse,
-    // BIconChevronDown,
-    // BIconChevronUp,
   },
   data: function () {
     const conn = new Conn(this.connected, NODE_URL, NODE_KEY);
     const address = null;
-    // const address = "0x00000000c911117a28a5f3e87c37d4c914c9b80a";
-    // localStorage.address = address;
     return {
       conn,
       address,
@@ -180,7 +126,6 @@ export default {
       const windowFeatures = "left=100,top=100,width=400,height=700";
       var popup = window.open("", "_blank",windowFeatures);
       popup.location = url;
-      //window.location.href = url;
     },
 
     fetchSignature: async function (token) {
@@ -229,61 +174,6 @@ export default {
       this.updateInvitationReward(0);
       this.updateDelegateeCheck(false);
     },
-    sendGenerateTx: async function () {
-      const args = [
-        {
-          index: 0,
-          format: "hex",
-          value: ART_GENERATORS[this.selectedGenerator].toString(),
-        },
-      ];
-      await this.buildTx("generate", args);
-    },
-    sendRegenerateTx: async function (args) {
-      const argsArray = [
-        {
-          index: 0,
-          format: "hex",
-          value: args.tokenId,
-        },
-        {
-          index: 1,
-          format: "hex",
-          value: ART_GENERATORS[this.selectedGenerator].toString(),
-        },
-      ];
-      await this.buildTx("regenerate", argsArray);
-    },
-    sendTransferTx: async function (args) {
-      const argsArray = [
-        {
-          index: 0,
-          format: "hex",
-          value: this.address,
-        },
-        {
-          index: 1,
-          format: "hex",
-          value: args.to,
-        },
-        {
-          index: 2,
-          format: "hex",
-          value: args.tokenId,
-        },
-      ];
-      await this.buildTx("transferFrom", argsArray);
-    },
-    sendBurnTx: async function (args) {
-      const argsArray = [
-        {
-          index: 0,
-          format: "hex",
-          value: args.tokenId,
-        },
-      ];
-      await this.buildTx("burn", argsArray);
-    },
     sendDelegateTx: async function () {
     const argsArray = [
       {
@@ -309,17 +199,9 @@ export default {
       this.generating = true;
       console.log(method, args);
       try {
-        // const nonce = this.addressNonce + 1;
-        // console.log("nonce", nonce);
         const maxFeeInt = 1e18;
         console.log("maxFeeInt", maxFeeInt);
         const maxFee = new BN(maxFeeInt.toString());
-        // const payload = proto.encodeProtoCallContractAttachment({
-        //   method,
-        //   args: argsToSlice(args),
-        // });
-        // console.log(payload);
-        // console.log(bufferToHex(payload));
         const amount = new BN(`${amountInt}000000000000000000`);
         const amountBytes = toBuffer(amount);
         const maxFeeBytes = toBuffer(maxFee);
@@ -338,7 +220,6 @@ export default {
             maxFee: maxFeeBytes,
             nonce: this.nonce,
             epoch: this.epoch,
-            // payload: payload,
           },
         });
         const serialized = bufferToHex(tx);
@@ -356,22 +237,6 @@ export default {
       }
       this.generating = false;
     },
-
-    waitForReceipt: async function (hash) {
-      this.waitingForReceipt = hash;
-      while (true) {
-        try {
-          const receipt = await this.conn.getTxReceipt(hash);
-          if (receipt) {
-            this.waitingForReceipt = null;
-            return receipt;
-          }
-        } catch (e) {
-          console.error(e);
-        }
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-      }
-    },
     ...mapActions(['updateStake', 'updateDelegatee','updateLoggedAddress','updateMiningReward','updateStakingReward','updateExtraFlipReward','updateInvitationReward','updateApy','updateMiningDistributionCountdown','updateStakingDistributionCountdown','updateDelegateeCheck','updateGlobeInicialized']),
     initAddress: async function () {
       console.log("initAddress");
@@ -380,60 +245,15 @@ export default {
         this.identity = await this.conn.getIdentity(this.address);
         this.updateLoggedAddress(this.address);
         console.log(this.loggedAddress,"LOGGGGGGEDADDD");
-        // localStorage.delegatee = this.identity.delegatee;
-        // console.log("identitySTORAGEDELEGATEE", localStorage.delegatee);
         this.updateDelegatee( await this.identity.delegatee);
-        
         this.stake = Number.parseFloat(this.identity.stake).toFixed(2);
         console.log("stakes", this.stake);
         this.updateStake(this.stake);
         console.log("calling getData");
         this.getData();
-
-        // this.updateMiningReward(this.calcMiningReward(this.stake));
-        // console.log("callingcalcMiningReward", this.calcMiningReward(this.stake));
-        // this.updateStakingReward(this.calcStakingReward(this.stake));
-        // this.updateExtraFlipReward(this.calcExtraFlipReward(this.stake));
-        // this.updateInvitationReward(this.calcInvitationReward(this.stake));
-        // this.updateApy((
-        //     (
-        //       (
-        //         this.calcMiningReward(this.stake) +
-        //         this.calcStakingReward(this.stake) +
-        //         this.calcExtraFlipReward(this.stake) +
-        //         this.calcInvitationReward(this.stake)
-        //       ) * 100 / this.stake
-        //     ) * 366
-        //   ) / this.epochTime.epochDuration);
-        //   console.log("apy z komponentu App.vue", ((
-        //     (
-        //       (
-        //         this.stakingReward +
-        //         this.miningReward +
-        //         this.extraFlipReward +
-        //         this.invitationReward
-        //       ) * 100 / this.stake
-        //     ) * 366
-        //   ) / this.epochTime.epochDuration));
-        // console.log("apy z komponentu App.vue", this.apy);
-        // this.identity.state = "Human";
-        // this.identity.address = this.address;
-        this.inft.balance = await this.conn.getTokenBalance(this.address);
-        this.inft.minted = await this.conn.getMintedBy(this.address);
         this.epoch = (await this.conn.getEpoch()).epoch;
-        // this.epoch = 0;
-        if (this.inft.balance > 0) {
-          this.inft.tokensOwned = await this.conn.getTokensOwnedBy(
-            this.address,
-            this.inft.balance
-          );
-          await this.fetchTokenUris(this.inft.tokensOwned);
-        } else {
-          this.inft.tokensOwned = [];
-        }
       }
     },
-    
         async fetchValidationTime() {
       try {
         const response = await axios.get('https://api.idena.io/api/Epoch/Last');
@@ -457,14 +277,11 @@ export default {
           this.countdown1 = '00:00:00:00';
           return;
         }
-
         const days = Math.floor(timeInSeconds / (3600 * 24));
         const hours = Math.floor((timeInSeconds % (3600 * 24)) / 3600);
         const minutes = Math.floor((timeInSeconds % 3600) / 60);
         const seconds = timeInSeconds % 60;
-
         this.countdown1 = `${this.formatTime(days)}:${this.formatTime(hours)}:${this.formatTime(minutes)}:${this.formatTime(seconds)}`;
-        // console.log("countdown1 z metody startValidationCouuntdown", this.countdown1); //sprawdzic to czy sie wywoluje w kosnoli
         this.updateStakingDistributionCountdown(this.countdown1);
       }, 1000);
     },
@@ -503,59 +320,7 @@ export default {
     formatTime(time) {
       return time.toString().padStart(2, '0')
     },
-    
-    fetchTokenUris: async function (tokenIds, force = false) {
-      for (const tokenId of tokenIds) {
-        let tokenUri = await this.getFromCache("tokenUris", tokenId);
-        let tokenPng = await this.getFromCache("tokenPngs", tokenId);
 
-        if (
-          tokenUri == null ||
-          tokenPng == null ||
-          tokenUri == "null" ||
-          force
-        ) {
-          console.warn("uncached tokenUri", tokenId, tokenUri);
-          tokenUri = await this.conn.getTokenURI(tokenId);
-          tokenPng = await rasterize(tokenUri);
-          await this.storeInCache("tokenUris", tokenId, tokenUri);
-          await this.storeInCache("tokenPngs", tokenId, tokenPng);
-        }
-        this.$set(this.inft.tokenPngs, tokenId, tokenPng);
-        this.$set(this.inft.tokenUris, tokenId, tokenUri);
-      }
-    },
-    fetchRecentlyMinted: async function (amount = 5) {
-      let supply = await this.conn.readCall("totalSupply");
-      console.log("supply", supply, "amount", amount);
-      const buf = Buffer.from(supply.slice(2), "hex").reverse();
-      supply = parseInt(buf.toString("hex"), 16);
-      console.log("supplyNum", supply);
-      let lastRecentId =
-        this.inft.recentlyMinted[this.inft.recentlyMinted.length - 1] ||
-        supply + 1;
-      console.log("lastRecentId", lastRecentId);
-      for (let i = 0; i < amount; i++) {
-        const tokenId = lastRecentId - 1;
-        if (tokenId <= 0) {
-          break;
-        }
-        const tokenIdHex = this.tokenIdToHex(tokenId);
-        console.log("tokenId", tokenId, tokenIdHex);
-        // TODO: Check for burn
-        await this.fetchTokenUris([tokenIdHex]);
-        this.inft.recentlyMinted.push(tokenId);
-        lastRecentId = tokenId;
-      }
-    },
-    openTokenOwner: async function (tokenId) {
-      var popup = window.open("", "_blank");
-      const owner = await this.conn.getTokenOwner(tokenId);
-      popup.location = `https://scan.idena.io/identity/${owner}`;
-    },
-    setGenerator(name) {
-      this.selectedGenerator = name;
-    },
     async getData() {
       console.log("CALLING GETDATA FROM APP.VUE")
       try {
@@ -649,30 +414,6 @@ export default {
     return this.calculateEstimatedMiningReward(myStakeWeight, this.averageMinerWeight, this.onlineSize, this.epochTime.epochDuration);
   },
 
-//   async fetchGeoJsonData() {
-//   fetch('/src/assets/simplifiedmap.geojson')
-//         .then(res => res.json())
-//         .then(countries => {
-//           this.updateGeoJsonData(countries.features);
-//           // console.log(countries.features, "country features")
-//         })
-//         .catch(error => {
-//           console.error('Error fetching map data:', error);
-//         });
-// },
-  
-    refreshURI: async function (tokenId) {
-      await this.fetchTokenUris([tokenId], true);
-    },
-    tokenIdToHex(tokenId) {
-      if (typeof tokenId !== "number") {
-        return null;
-        // tokenId = parseInt(tokenId, 16);
-      }
-      return (
-        "0x" + intToBuffer(tokenId).reverse().toString("hex").padEnd(16, "0")
-      );
-    },
     onStorageUpdate(event) {
       if (event.key === "address") {
         console.log("storage update", event.newValue);
@@ -694,182 +435,9 @@ export default {
         console.error("Error while storing in cache:", e);
       }
     },
-    initGlobe() {
-      console.log('Initializing globe')
-      const width = document.documentElement.clientWidth * 0.65;
-      const height = document.documentElement.clientHeight * 0.6;
-
-      this.world = Globe({ animateIn: false, waitForGlobeReady: false })
-        // (document.getElementById('globeViz'))
-        .width(width)
-        .height(height)
-         .globeImageUrl(texture)
-         //.globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
-        .pointOfView({ lat: 51, lng: 9, altitude: 1.6 }) // aim at Germany
-        .polygonAltitude(0.05)
-        .polygonCapColor(() => '#056CF2')
-        .polygonSideColor(() => 'rgba(0, 0, 0, 0)')
-        .polygonCapCurvatureResolution(5)
-        .labelsData([
-          {
-            lat: 51,
-            lng: 10,
-            text: 'Germany',
-            altitude: 0.059,
-            dotradius: 1.2,
-            size: 1.2,
-            color: '#0000001', // Set the color to black (#000000) for the first label
-            desc: 'Shared  node'
-          },
-          { //Background
-            lat: 51.2,
-            lng: 10,
-            text: 'Germany',
-            altitude: 0.06,
-            dotradius: 1.2,
-            size: 1.25,
-            color: '#000000',
-            desc: 'Shared  node'
-
-          },
-          // { 
-          //   lat: 52.5,
-          //   lng: 19,
-          //   text: 'Poland',
-          //   altitude: 0.06,
-          //   dotradius: 1.2,
-          //   size: 1.2,
-          //   color: '#000000',
-          //   desc: 'Mining  node'
-          // }
-        ]).labelLat(d => d.lat)
-        .labelLng(d => d.lng)
-        .labelText(d => d.text)
-        .labelSize(d => d.size) // Adjust label size as needed
-        .labelDotRadius(d => d.dotradius)
-        .labelAltitude(d => d.altitude) // Set label altitude from the data
-        .labelColor(d => d.color)
-        .polygonStrokeColor(() => '#f0f2f5')
-        .labelLabel(d => `
-        <div id="hoverStats">
-        <div id="hoverTitle"><b>${d.desc}</b></div>
-        <div id="numberOfKeys">
-          API keys sold:
-        <span id="totalSold"> ${this.transactionCount} in total</span>
-        <span id="thisEpochSold">${this.thisEpochTransactionCount} this epoch</span> 
-        <span>buy access via official shared node marketplace </span> 
-    </div>
-        
-        </div>
-      `)
-        .backgroundColor('#f0f2f5');
-
-    //   const globeMaterial = this.world.globeMaterial();
-    //   globeMaterial.bumpScale = 10;
-    //   new THREE.TextureLoader().load('/src/assets/pobrane-jasne.png', texture => {
-    //   globeMaterial.specularMap = texture;
-    //   globeMaterial.specular = new THREE.Color('grey');
-    //   globeMaterial.shininess = 15;
-    // });
-
-
-
-      // fetch('/src/assets/font.json')
-      //   .then(response => {
-      //     if (!response.ok) {
-      //       throw new Error('Network response was not ok');
-      //     }
-      //     return response.json();
-      //   })
-      //   .then(data => {
-      //     this.labelfont = data;
-      //     this.world.labelTypeFace(this.labelfont);
-      //   })
-      //   .catch(error => {
-      //     console.error('Error fetching labelfont:', error);
-      //   });  
-
-          // this.world.polygonsData(this.geoJsonData);
-      fetch('/src/assets/simplifiedmap.geojson')
-        .then(res => res.json())
-        .then(countries => {
-          this.world.polygonsData(countries.features);
-        })
-        .catch(error => {
-          console.error('Error fetching map data:', error);
-        });
-        this.updateGlobeInicialized(this.world);
-        console.log("globe initialized", this.world);
-        
-    },
-           makeSyncingRequest() {
-      const rpcEndpoint = 'https://idenanode.com';
-      const payload = {
-        method: 'bcn_syncing',
-        params: [],
-        id: 1,
-        key: '22ref1stat122',
-      };
-
-      return axios.post(rpcEndpoint, payload)
-        .then(response => response.data)
-        .catch(error => {
-          console.error('Error:', error);
-          throw error;
-        });
-    },
-        handleRefreshClick() {
-         //world.labelColor(() => 'rgba(0, 0, 0, 1)');
-
-      this.world.labelColor(d => {
-        if (d.text === 'Germany' && d.color !== '#000000') {
-          return 'rgba(0, 0, 0, 0.6)'; // Keep the shadow 0.6 opacity on refresh
-        }
-      });
-
-      this.makeSyncingRequest()
-        .then(data => {
-          console.log(data);
-          // Determine color based on 'syncing' field
-          const labelColor = data.result.syncing ? '#FF681E' : '#00FF00';
-          // Update label colors
-          this.world.labelColor(d => {
-            if (d.text === 'Germany' && d.color !== '#000000') {
-              return 'rgba(0, 0, 0, 0.6)'; // Keep the 'Germany' label black
-            } else if (d.text === 'Germany') {
-              return labelColor; // Change color for the 'Another Label'
-            } else {
-              return d.color; // Keep other labels' color as is
-            }
-          });
-        })
-        .catch(error => {
-          console.error('Error:', error);
-          // Offline color
-          const offlineColor = '#FF000D';
-
-          // Update label colors
-          this.world.labelColor(d => {
-            if (d.text === 'Germany' && d.color !== '#000000') {
-              return 'rgba(0, 0, 0, 0.6)'; // Keep the 'Germany' label black
-            } else if (d.text === 'Germany') {
-              return offlineColor; // Change color for the 'Another Label'
-            } else {
-              return d.color; // Keep other labels' color as is
-            }
-          });
-        });
-    },
   },
   mounted() {
-    //this.loadMapData();
     this.fetchValidationTime();
-    this.initGlobe();
-
-    this.handleRefreshClick();
-    console.log("fetching geojson data");
-    // this.fetchGeoJsonData();
-    // this.startCountdown();
     console.log("starting mining countdown");
     this.startCountdown();
     console.log(this.countdown);
@@ -900,31 +468,7 @@ export default {
       this.initAddress();
     },
   },
-  computed: {
-    canMint: function () {
-      if (!this.address) {
-        return false;
-      }
-      if (STATES_CAN_MINT.indexOf(this.identity.state) == -1) {
-        return false;
-      }
-      if (this.inft.minted == null || this.inft.minted != ZERO_TOKEN) {
-        return false;
-      }
-      return true;
-    },
-    waitingForReceiptLink() {
-      return `https://scan.idena.io/transaction/${this.waitingForReceipt}`;
-    },
-    waitingForReceiptShortHash() {
-      // leave only first 4 and last 4 chars
-      const shortHash =
-        this.waitingForReceipt.slice(0, 6) +
-        ".." +
-        this.waitingForReceipt.slice(-4);
-      return shortHash;
-    },
-  },
+ 
   created: async function () {
     const url = new URLSearchParams(window.location.search);
     const path = location.pathname.slice(1);
@@ -1059,76 +603,8 @@ nav a.router-link-exact-active {
   height: 40px;
   transition:none;
   margin-right: 30px;
-  /* background-color: #f0f2f5; */
-  /* margin-left: 30px; */
 }
 
-/* body{
-  display: flex;
-  flex-direction: column;
-} */
- /* header {
-  line-height: 1.5;
-  height:10vh;
-} */
-/*
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
-}
-
-nav a.router-link-exact-active {
-  color: var(--color-text);
-}
-
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
-}
-
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
-}
-
-nav a:first-of-type {
-  border: 0;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
-} */
- /* Hide the SVG icon by default */
 .status-icon {
   display: none;
   width: 16px; /* Original size */
@@ -1148,7 +624,6 @@ nav a:first-of-type {
   transform: scale(1.5); /* 2x scale */
 }
 
-/* Show text by default */
 .status-text {
   display: inline-block;
 }
@@ -1163,9 +638,7 @@ nav a:first-of-type {
 display: flex; flex-direction: row; height: 100%; align-items: center; justify-content: center; margin-top: 0px; margin-right: 15px; 
 }
 
-/* Mobile View: When screen is smaller than 768px */
 @media (max-width: 768px) {
-  /* Hide text and show the icon on smaller screens */
   .status-text{
     display: none;
   }
@@ -1212,9 +685,6 @@ display: flex; flex-direction: row; height: 100%; align-items: center; justify-c
     margin-right: 0px;
   }
 
-  /* .logo{
-    display: none;
-  } */
 }
 
 .menu-icon {
