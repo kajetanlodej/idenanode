@@ -63,35 +63,56 @@
      <div class="spinner-border text-primary" role="status">
   <!-- <span class="visually-hidden">Loading...</span> -->
 </div>
-
-    <button 
+    <span v-if="loggedAddress!== null && delegatee === null"> You are currently not delegating to any pool</span>
+<span v-if="loggedAddress !== null && delegate !== null">
+  You are currently delegating to: 
+  <a 
+    :href="'https://scan.idena.io/pool/' + delegatee" 
+    target="_blank" 
+    rel="noopener noreferrer">
+    <span v-if="delegatee === POOL_ADDRESS">Idenanode pool</span>
+    <span v-else>{{ delegatee.substring(0, 6) }}...</span>
+  </a>
+</span>   <button 
       class="button" 
+      style="display: flex; flex-direction: column; align-items: center;"
       type="button" 
-      v-if="loggedAddress !== null && !isMyPoolDelegatee && !myDelegatee" 
+      v-if="loggedAddress !== null && delegatee === null" 
       @click="handleDelegateClick"
       :disabled="this.delegationPopup"
     >
-      <span v-if="!this.delegationPopup">DELEGATE</span>
-      <span v-else class="loader"></span>
+      <span class="mainButton nav-text button-text" v-if="!myDelegatee">DELEGATE</span>
+      <span v-else-if="myDelegatee" class="loader"></span>
+      <span class="subButton nav-text button-text">TO IDENANODE POOL</span>
+
     </button>
+    
     <button 
       class="button" 
+      style="display: flex; flex-direction: column; align-items: center;"
       type="button" 
-      v-else-if="loggedAddress !== null && delegatee !== null && isMyPoolDelegatee || myDelegatee" 
+      v-if="loggedAddress !== null && delegatee !== null"
       @click="handleUnDelegateClick"
       :disabled="this.delegationPopup"
     >
-      <span v-if="!this.delegationPopup">UNDELEGATE</span>
-      <span v-else class="loader"></span>
+      <span class="mainButton nav-text button-text" v-if="!myDelegatee">UNDELEGATE</span>
+      <span v-else-if="myDelegatee" class="loader"></span>
+      <span class="subButton nav-text button-text">FROM CURRENT POOL</span>
+
+      <!-- <span>from current pool</span> -->
     </button>
+
+    <!-- logged out -->
     <button  
       class="button" 
+      style="display: flex; flex-direction: column; align-items: center;"
       type="button"
-      v-else-if="loggedAddress === null"
-      :disabled="delegatee === null || this.delegationPopup"
+      v-if="loggedAddress === null"
+      :disabled="true"
     >
-      <span v-if="!this.delegationPopup">DELEGATE</span>
-      <span v-else class="loader"></span>
+      <span class="mainButton nav-text button-text">DELEGATE</span>
+      <span class="subButton nav-text button-text">TO IDENANODE POOL</span>
+
     </button>
 <!-- <div class="spinner-border" role="status">
   <span class="sr-only">Loading...</span>
@@ -103,7 +124,7 @@
     <!-- <div id ="address">
       0x4AE59825651D492134fc67ED1DD459E4F006CF93
     </div> -->
-    <a href="https://scan.idena.io/pool/0x4AE59825651D492134fc67ED1DD459E4F006CF93" target="_blank">Pool details</a>
+    <a href="https://scan.idena.io/pool/0x4AE59825651D492134fc67ED1DD459E4F006CF93" target="_blank">Idenanode pool details</a>
     </div>
 
     <div id="countdowns">
@@ -340,6 +361,7 @@ export default {
       STAKING_POWER: 0.9,
       //amountValue: 100000, //change to take into account the amount of the user
       transactions: [],
+      delegateFound: false,
     }
   },
   computed: {
@@ -386,7 +408,7 @@ export default {
     // console.log(this.loggedAddress,"ADDDDDDDD");
     await this.buildTx("delegate", argsArray, 0x12);
 },
-...mapActions(['updateDelegationPopup', 'updateDelegateeCheck']),
+...mapActions(['updateDelegationPopup', 'updateDelegateeCheck','updateDelegatee']),
 async handleDelegateClick() {
       this.updateDelegationPopup(true);
       console.log("popup CZY JEST ODPALONY???????",this.delegationPopup)
@@ -412,7 +434,7 @@ async handleDelegateClick() {
           },
         ];
         // console.log(this.loggedAddress,"ADDDDDDDD");
-        await this.buildTx("delegate", argsArray, 0x13);
+        await this.buildTx("undelegate", argsArray, 0x13);
     },
 
     checkPendingTxs: async function () {
@@ -428,11 +450,17 @@ async handleDelegateClick() {
     if (this.txgenerated && this.txgenerated.transactions ) {
       for (let tx of this.txgenerated.transactions) {
         if (tx.type === "delegate" && tx.to === POOL_ADDRESS) {
-          console.log("Delegate transaction found:", tx);
+          console.log("Transaction found:", tx);
           delegateFound = true;
           this.updateDelegateeCheck(true);
+          this.updateDelegatee(tx.to);
           console.log("updateDelegateeCheck",this.myDelegatee);
           break; // Exit loop once a matching delegate transaction is found
+        }
+
+        if ( tx.type === "undelegate") {
+          this.updateDelegatee(null);
+
         }
       }
 
@@ -441,29 +469,29 @@ async handleDelegateClick() {
         console.log("No matching delegate transaction found, clearing interval.");
         this.updateDelegationPopup(false);
         console.log(this.delegationPopup)
+        this.updateDelegateeCheck(false);
+
       }
     } else {
       console.log("No transactions or response is invalid, clearing interval.");
-            console.log("status", this.delegationPopup);
-            
+      console.log("status", this.delegationPopup);
+      this.updateDelegateeCheck(false);
       this.updateDelegationPopup(false);
-            console.log("status", this.delegationPopup);
+      console.log("status", this.delegationPopup);
 
     }
   } catch (error) {
     console.error("Error fetching pending transactions:", error);
     this.updateDelegationPopup(false);
-            console.log(this.delegationPopup)
+    console.log(this.delegationPopup)
+    this.updateDelegateeCheck(false);
+
 
   }
 
     },
 
   buildTx: async function (method, args, TxType, amountInt = 0) {
-      // console.log("MINING REWARD Z KOMPONENTU DELEGATION",this.miningReward);
-      // console.log("APY Z KOMPONENETU DELEGATION",this.apy);
-      // console.log("minign distribution countdown z delegation",this.miningCountdown);
-      // console.log(this.validationCountdown,"validation countdown z delegation WZNEEEEEEEEEEEEEEEEEEEEEEEEEEEEE")
       const windowFeatures = "left=100,top=100,width=400,height=700";
       var popup = window.open("", "_blank",windowFeatures);
 
@@ -514,6 +542,7 @@ async handleDelegateClick() {
         const maxFeeBytes = toBuffer(maxFee);
         console.log("amount", amount.toString(), amountBytes);
         console.log("maxFee", maxFee.toString(), maxFeeBytes);
+
         const addre = "0x71eecdf6414eda0be975c2b748a74ca5018460e4"; //TODO: change to the address of the pool
         this.epoch = (await this.conn.getEpoch()).epoch;
         this.nonce = (await this.conn.getBalance(this.loggedAddress)).nonce + 1;
@@ -523,17 +552,20 @@ async handleDelegateClick() {
 // });        console.log("txgenerated", this.txgenerated.transactions);
         console.log("nonce", this.nonce);
         console.log("lolz",this.epoch);
-        const tx = proto.encodeProtoTransaction({
-          data: {
-            type: TxType,
-            to: toBuffer(addre),
-            amount: amountBytes,
-            maxFee: maxFeeBytes,
-            nonce: this.nonce,
-            epoch: this.epoch,
-            // payload: payload,
-          },
-        });
+        const txData = {
+  type: TxType,
+  maxFee: maxFeeBytes, //todo 
+  nonce: this.nonce,
+  epoch: this.epoch,
+};
+
+if (method !== "undelegate") {
+  txData.to = toBuffer(addre);
+}
+
+const tx = proto.encodeProtoTransaction({
+  data: txData,
+});
         const serialized = bufferToHex(tx);
         console.log("serialized", serialized);
         const page_url =

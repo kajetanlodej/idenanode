@@ -43,7 +43,7 @@
 
         <button id="button-signout"
  style="display: flex; flex-direction: column; align-items: center;" class="button" type="button" @click.stop="$emit('signOut')">
-                  <span class="mainButton nav-text button-text" >LOG OUT</span>
+                  <span class="nav-text button-text" >LOG OUT</span>
 
                   <!-- SVG Icon for LOG OUT -->
         <svg

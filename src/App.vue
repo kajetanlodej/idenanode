@@ -16,17 +16,12 @@ import {
   keccak256,
   pubToAddress,
   isValidAddress,
-  intToBuffer,
 } from "ethereumjs-util";
 import { Buffer } from "buffer";
 import { BN } from "bn.js";
 import * as proto from "./proto/models_pb.js";
 import axios from 'axios'
-import Globe from 'globe.gl';
-
 </script>
-
-
 
 <template>
   <div id="wrapper">
@@ -245,7 +240,9 @@ export default {
         this.identity = await this.conn.getIdentity(this.address);
         this.updateLoggedAddress(this.address);
         console.log(this.loggedAddress,"LOGGGGGGEDADDD");
-        this.updateDelegatee( await this.identity.delegatee);
+        this.updateDelegatee(null); //Fix the empty delegatee
+        this.updateDelegatee(await this.identity.delegatee);
+        console.log("delegateeeeeeeeeeeeeeeeeeeeeeeee",await this.identity.delegatee);
         this.stake = Number.parseFloat(this.identity.stake).toFixed(2);
         console.log("stakes", this.stake);
         this.updateStake(this.stake);

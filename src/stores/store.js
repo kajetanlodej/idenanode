@@ -13,7 +13,7 @@ export default createStore({
     miningDistributionCountdown: 0,
     stakingDistributionCountdown: 0,
     delegationPopup: false,
-    myDelegatee: null,
+    myDelegatee: false,
     globeInicialized: null,
   },
   mutations: {
