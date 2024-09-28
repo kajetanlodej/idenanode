@@ -63,17 +63,19 @@
      <div class="spinner-border text-primary" role="status">
   <!-- <span class="visually-hidden">Loading...</span> -->
 </div>
-    <span v-if="loggedAddress!== null && delegatee === null"> You are currently not delegating to any pool</span>
-<span v-if="loggedAddress !== null && delegate !== null">
+    <span id="currentStatus" style="margin-bottom:2px" v-if="loggedAddress!== null && delegatee === null"> You are currently not delegating to any pool</span>
+<span id="currentStatus" style="margin-bottom:2px" v-if="loggedAddress !== null && delegatee !== null">
   You are currently delegating to: 
   <a 
     :href="'https://scan.idena.io/pool/' + delegatee" 
     target="_blank" 
     rel="noopener noreferrer">
-    <span v-if="delegatee === POOL_ADDRESS">Idenanode pool</span>
+    <span v-if="delegatee === poolAddress">Idenanode pool</span>
     <span v-else>{{ delegatee.substring(0, 6) }}...</span>
   </a>
-</span>   <button 
+</span>  
+
+<button 
       class="button" 
       style="display: flex; flex-direction: column; align-items: center;"
       type="button" 
@@ -81,9 +83,11 @@
       @click="handleDelegateClick"
       :disabled="this.delegationPopup"
     >
-      <span class="mainButton nav-text button-text" v-if="!myDelegatee">DELEGATE</span>
-      <span v-else-if="myDelegatee" class="loader"></span>
-      <span class="subButton nav-text button-text">TO IDENANODE POOL</span>
+    <span v-if="!myDelegatee" class="buttonText">
+      <span class="mainButton nav-text">DELEGATE</span>
+      <span class="subButton nav-text">TO IDENANODE POOL</span>
+    </span>
+      <span v-if="myDelegatee" class="loader"></span>
 
     </button>
     
@@ -95,9 +99,11 @@
       @click="handleUnDelegateClick"
       :disabled="this.delegationPopup"
     >
-      <span class="mainButton nav-text button-text" v-if="!myDelegatee">UNDELEGATE</span>
-      <span v-else-if="myDelegatee" class="loader"></span>
-      <span class="subButton nav-text button-text">FROM CURRENT POOL</span>
+    <span v-if="!myDelegatee" class="buttonText">
+      <span class="mainButton nav-text">UNDELEGATE</span>
+      <span class="subButton nav-text">FROM CURRENT POOL</span>
+    </span>  
+      <span v-if="myDelegatee" class="loader"></span>
 
       <!-- <span>from current pool</span> -->
     </button>
@@ -110,8 +116,8 @@
       v-if="loggedAddress === null"
       :disabled="true"
     >
-      <span class="mainButton nav-text button-text">DELEGATE</span>
-      <span class="subButton nav-text button-text">TO IDENANODE POOL</span>
+      <span class="mainButton nav-text">DELEGATE</span>
+      <span class="subButton nav-text">TO IDENANODE POOL</span>
 
     </button>
 <!-- <div class="spinner-border" role="status">
@@ -124,7 +130,7 @@
     <!-- <div id ="address">
       0x4AE59825651D492134fc67ED1DD459E4F006CF93
     </div> -->
-    <a href="https://scan.idena.io/pool/0x4AE59825651D492134fc67ED1DD459E4F006CF93" target="_blank">Idenanode pool details</a>
+    <a style="margin-top:2px" v-if="delegatee != poolAddress" href="https://scan.idena.io/pool/0x4AE59825651D492134fc67ED1DD459E4F006CF93" target="_blank">Idenanode pool details</a>
     </div>
 
     <div id="countdowns">
@@ -137,170 +143,8 @@
         <span id="clock">{{ this.miningCountdown }}</span>
         <span id="clock">{{ this.validationCountdown}}</span>
       </div>
-      
     </div>
-
     </div>
-
-    <!-- <div id="countdown">
-      <span id="clock">{{ countdown }}</span>
-    </div> -->
-    <!-- <div id="validation">
-      <span>Until the next distribution of mining rewards</span>
-      <hr id="divider" />
-      <span>Validation rewards are distributed right after the validation ends</span>
-    </div> -->
-    <!-- <div id="delegation">
-      <span>Delegate to idenanode.com pool:</span>
-      <button>DELEGATE</button>
-      <div id="delegationStatus">
-        <span>Your Idena identity is currently</span> <span>delegated / undelegated</span>
-        <span>to idenanode.com</span>
-      </div>
-    </div> -->
-
-    <!-- <div id="stats">
-  <div id="identityStats">
-    <h2>Identity stats</h2>
-      <span>Mining reward: {{ delegatorsCount }} iDNA</span>
-      <span>Validation reward: {{ totalStake }} iDNA</span>
-      <span>Extra flip premium: 100 iDNA </span>
-      <span>Invitation reward: 100 iDNA</span>
-      <span>Total rewards received: 200 iDNA </span>
-      <span>Rewards last received on: 16.02.2024</span>
-    </div>
-    <div id="poolStats">
-      <h2>Pool stats</h2>
-      <span>Identities: {{ delegatorsCount }}</span>
-      <span>Total stake: {{ totalStake }} iDNA</span>
-    </div>
-    <div id="aboutDelegation">
-      <span>See <a target="_blank" href="https://www.idena.io/pl/faq#faq-delegation-1">official FAQ</a> on idena.io to learn more about delegation.</span>
-      <span>Be aware that pool owner has the ability to terminate delegated identity and pocket its stake.</span>
-      <span>Delegate your identity only to a trusted pool.</span>
-    </div>
-  </div> -->
-
-
-
-
-    <!-- <div class="container">
-      <ul class="nav nav-tabs">
-        <li class="active">
-          <a data-toggle="tab" href="#home"
-            >Pool's delegators: {{ totalDelegators }} </a
-          >
-        </li>
-        <li>
-          <a data-toggle="tab" href="#menu1"
-            >Receive history from idenanode.com</a
-          >
-        </li>
-
-      </ul>
-
-      <div class="tab-content" style="height: 40vh; overflow-y: auto">
-        <div id="home" class="tab-pane fade in active">
-          <div class="table-responsive">
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Address</th>
-                  <th>Stake, iDNA</th>
-                  <th>Status</th>
-                  <th>Age</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="delegator in delegators" :key="delegator.address">
-                  <td>
-                    <div id="user">
-                      <div class="user-pic">
-                        <img
-                          :src="delegator.address ? `https://robohash.idena.io/${delegator.address.toLowerCase()}` : ''"
-                          alt="pic"
-                          width="32"
-                        />
-                      </div>
-                      <div class="text_block text_block--ellipsis">
-                        <a
-                          :href="`https://scan.idena.io/address/${delegator.address}`"
-                          target="_blank"
-                          @click="$event.target.blur()"
-                        >
-                          {{ delegator.address }}
-                        </a>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="rowElement">
-                    {{ parseFloat(delegator.stake).toFixed(2) }}
-                  </td>
-                  <td class="rowElement">{{ delegator.state }}</td>
-                  <td class="rowElement">{{ delegator.age }}</td>
-                </tr>
-              </tbody>
-            </table>
-            <div class="text-center">
-              <button
-                v-if="dataLoaded && !allDelegatorsFetched"
-                @click="fetchMoreDelegators"
-              >
-                Show More
-              </button>
-            </div>
-          </div>
-        </div>
-        <div id="menu1" class="tab-pane fade">
-          <div class="table-responsive">
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Transaction</th>
-
-                  <th>Amount, iDNA</th>
-                  <th style="width: 220px">Timestamp</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="transaction in transactions" :key="transaction.hash">
-                  <td>
-                    <div
-                      class="text_block text_block--ellipsis"
-                      style="width: 80px"
-                    >
-                      <a
-                        :href="`https://scan.idena.io/transaction/${transaction.hash}`"
-                        target="_blank"
-                        @click="$event.target.blur()"
-                        >{{ transaction.hash.substring(0, 8) + '...' }}</a
-                      >
-                    </div>
-                  </td>
-                  <td class="rowElement">{{transaction.amount}}</td>
-                  <td class="rowElement">
-                    
-                    {{new Date(transaction.timestamp).toLocaleString()}}
-                  </td>
-
-                </tr>
-              </tbody>
-            </table>
-            <div class="text-center" v-if="canFetchMore">
-              <button
-                v-if="dataLoaded && !allTransactionsFetched"
-                @click="fetchMoreTransactions"
-              >
-                Show More
-              </button>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div> -->
-
-
   </div>
 </template>
 <script>
@@ -308,17 +152,13 @@ import { mapActions } from 'vuex';
 import { mapState } from 'vuex'
 import axios from 'axios'
 import {
-  // ART_GENERATORS,
   POOL_ADDRESS,
 } from "../config.js";
 import 'bootstrap';
 import { Conn } from "../connection.js";
 import {
-  // ART_GENERATORS,
-  CALLBACK_URL,
   NODE_URL,
   NODE_KEY,
-  AUTH_WORKER_URL,
 } from "../config.js";
 import {
   bufferToHex,
@@ -333,6 +173,7 @@ export default {
       const conn = new Conn(this.connected, NODE_URL, NODE_KEY);
 
     return {
+      poolAddress: null, // Initialize as null to avoid undefined access
       popupOpen: false,
       conn,
       countdown: '00:00:00',
@@ -363,6 +204,10 @@ export default {
       transactions: [],
       delegateFound: false,
     }
+  },
+    created() {
+    // Set the POOL_ADDRESS after component creation
+    this.poolAddress = POOL_ADDRESS;
   },
   computed: {
     ...mapState({
@@ -460,6 +305,8 @@ async handleDelegateClick() {
 
         if ( tx.type === "undelegate") {
           this.updateDelegatee(null);
+          this.updateDelegateeCheck(true);
+          delegateFound = true;
 
         }
       }
@@ -1151,10 +998,27 @@ h3{
   height: 150px;
 }
 
-#clock{
-  font-size: 1.7rem; }
+#currentStatus {
+  font-size: 1.2rem;
 }
 
+#clock{
+  font-size: 1.7rem; 
+}
+
+#currentStatus {
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+}
+
+}
+
+.buttonText{
+  display: flex;
+  flex-direction: column;  
+}
 .loader {
     width: 24px;
     height: 24px;

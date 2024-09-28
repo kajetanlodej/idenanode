@@ -3,7 +3,7 @@
     <div class="section" id="first-section">
     <h1>Services</h1>
     <span>
-Idenanode.com offers two main services: shared node access, connecting users to the Idena blockchain without managing their own node, and mining node delegation, enabling users to delegate their identity for network security participation.</span>
+Idenanode.com offers two main services: shared node access, connecting users to the Idena blockchain without the need to manage their own node, and mining node delegation, enabling users to delegate their identity for participation in network security. Shared node access can be purchased through the official shared node marketplace built into the Idena web app.</span>
 
 </div>
     <div class="section">
@@ -12,7 +12,8 @@ Idenanode.com offers two main services: shared node access, connecting users to 
     </div>
     <div class="section">
     <h1>Fees</h1>
-    <span>The distribution of mining rewards follows a 92/8 split, with 92% allocated to the delegatee and 8% to the pool owner. Additionally, all validation rewards go directly to the user, with no fees applied.</span>
+    <span>
+The distribution of mining rewards follows a 90/10 split, with 90% allocated to the delegatee and 10% to the pool owner. Additionally, all other rewards (validation, invite, extra flip) go directly to the user, with no fees applied.</span>
     </div>
     <div class="section" style="margin-bottom: 0px;">
     <h1>Disclaimer</h1>

@@ -58,8 +58,6 @@ import axios from 'axios'
             <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>
           </svg>
         </RouterLink>
-
-
       </nav>
       
       <Identity :identity="identity" @signOut="signOut" @signIn="signIn" />
@@ -75,13 +73,11 @@ import axios from 'axios'
 </template>
 <script>
 import { mapActions } from 'vuex';
-import texture from '/src/assets/pobrane-jasne.png';
 
 // import { update } from 'cypress/types/lodash';
 
 export default {
   name: "App",
-
   components: {
     Identity,
   },
@@ -93,23 +89,12 @@ export default {
       address,
       identity: { state: "Undefined", address: address },
       epoch: 0,
-      generating: false,
-      inft: {
-        balance: 0,
-        minted: "",
-        tokensOwned: [],
-        tokenUris: {},
-        tokenPngs: {},
-        recentlyMinted: [],
-      },
       STAKING_POWER: 0.9,
-      waitingForReceipt: null,
     };
   },
   methods: {
     signIn: function () {
       this.signOut();
-      //crypto strong random values (10)
       const array = new Uint32Array(1);
       const token = "tkn-" + crypto.getRandomValues(array).toString("hex");
       const url = `https://app.idena.io/dna/signin
@@ -138,7 +123,6 @@ export default {
       );
       const data = await response.json();
       window.close();
-      console.log("data", data);
       return data.signature;
     },
     recoverAddress: function (signature) {
@@ -154,9 +138,6 @@ export default {
       history.pushState("", document.title, "/");
       this.address = null;
       this.identity = { state: "Undefined", address: null };
-      this.inft.balance = 0;
-      this.inft.minted = null;
-      this.inft.tokensOwned = [];
       localStorage.removeItem("address");
       this.delegatee = null;
       this.updateStake(0);
@@ -191,22 +172,15 @@ export default {
     },
   buildTx: async function (method, args, TxType, amountInt = 0) {
       var popup = window.open("", "_blank");
-      this.generating = true;
-      console.log(method, args);
       try {
         const maxFeeInt = 1e18;
-        console.log("maxFeeInt", maxFeeInt);
         const maxFee = new BN(maxFeeInt.toString());
         const amount = new BN(`${amountInt}000000000000000000`);
         const amountBytes = toBuffer(amount);
         const maxFeeBytes = toBuffer(maxFee);
-        console.log("amount", amount.toString(), amountBytes);
-        console.log("maxFee", maxFee.toString(), maxFeeBytes);
         const addre = "0x71eecdf6414eda0be975c2b748a74ca5018460e4";
         this.epoch = (await this.conn.getEpoch()).epoch;
         this.nonce = (await this.conn.getBalance(this.address)).nonce + 1;
-        console.log("nonce", this.nonce);
-        console.log("lolz",this.epoch);
         const tx = proto.encodeProtoTransaction({
           data: {
             type: TxType,
@@ -218,11 +192,9 @@ export default {
           },
         });
         const serialized = bufferToHex(tx);
-        console.log("serialized", serialized);
         const page_url =
           location.protocol + "//" + location.host + location.pathname;
         const callback_url = encodeURIComponent(page_url);
-        console.log("callback", callback_url);
         const url = `https://app.idena.io/dna/raw?tx=${serialized}
         &callback_url=${callback_url}?method=${method}`;
         popup.location = url;
@@ -230,7 +202,6 @@ export default {
         popup.close();
         console.error(e);
       }
-      this.generating = false;
     },
     ...mapActions(['updateStake', 'updateDelegatee','updateLoggedAddress','updateMiningReward','updateStakingReward','updateExtraFlipReward','updateInvitationReward','updateApy','updateMiningDistributionCountdown','updateStakingDistributionCountdown','updateDelegateeCheck','updateGlobeInicialized']),
     initAddress: async function () {
@@ -239,14 +210,10 @@ export default {
         console.log("address", this.address);
         this.identity = await this.conn.getIdentity(this.address);
         this.updateLoggedAddress(this.address);
-        console.log(this.loggedAddress,"LOGGGGGGEDADDD");
         this.updateDelegatee(null); //Fix the empty delegatee
         this.updateDelegatee(await this.identity.delegatee);
-        console.log("delegateeeeeeeeeeeeeeeeeeeeeeeee",await this.identity.delegatee);
         this.stake = Number.parseFloat(this.identity.stake).toFixed(2);
-        console.log("stakes", this.stake);
         this.updateStake(this.stake);
-        console.log("calling getData");
         this.getData();
         this.epoch = (await this.conn.getEpoch()).epoch;
       }
@@ -311,7 +278,6 @@ export default {
           this.startCountdown(); // Restart the countdown for the next day
         }
       }, 1000);
-      console.log("countdown prosto z metodu startCountdown", this.countdown);
       this.updateMiningDistributionCountdown(this.countdown);
     },
     formatTime(time) {
@@ -319,7 +285,6 @@ export default {
     },
 
     async getData() {
-      console.log("CALLING GETDATA FROM APP.VUE")
       try {
         const coinsResponse = await axios.get('https://api.idena.io/api/coins');
         const stakingResponse = await axios.get('https://api.idena.io/api/staking');
@@ -359,9 +324,7 @@ export default {
           epochLeft,
           epochLeftUnit,
         };
-        console.log("results epochtime from app.data",this.epochTime.epochDuration, this.epochTime.epochLeftPercent, this.epochTime.epochLeft, this.epochTime.epochLeftUnit);
         this.updateMiningReward(this.calcMiningReward(this.stake));
-        console.log("callingcalcMiningReward", this.calcMiningReward(this.stake));
         this.updateStakingReward(this.calcStakingReward(this.stake));
         this.updateExtraFlipReward(this.calcExtraFlipReward(this.stake));
         this.updateInvitationReward(this.calcInvitationReward(this.stake));
@@ -407,7 +370,6 @@ export default {
   },
   calcMiningReward(amount) {
     const myStakeWeight = amount ** this.STAKING_POWER;
-    console.log("calling calcMiningReward");
     return this.calculateEstimatedMiningReward(myStakeWeight, this.averageMinerWeight, this.onlineSize, this.epochTime.epochDuration);
   },
 
@@ -417,27 +379,11 @@ export default {
         this.address = event.newValue;
       }
     },
-    getFromCache: async function (store, key) {
-      try {
-        return await (await dbPromise).get(store, key);
-      } catch (e) {
-        console.error("Error while getting from cache:", e);
-        return null;
-      }
-    },
-    storeInCache: async function (store, key, value) {
-      try {
-        await (await dbPromise).put(store, value, key);
-      } catch (e) {
-        console.error("Error while storing in cache:", e);
-      }
-    },
+    
   },
   mounted() {
     this.fetchValidationTime();
-    console.log("starting mining countdown");
     this.startCountdown();
-    console.log(this.countdown);
     if (localStorage.address != null) {
       console.log("address in storage", localStorage.address);
       if (isValidAddress(localStorage.address) == false) {
@@ -448,10 +394,6 @@ export default {
       this.address = localStorage.address;
     }
     window.addEventListener("storage", this.onStorageUpdate);
-    // this.fetchRecentlyMinted();
-  },
-  beforeDestroy() {
-    window.removeEventListener("storage", this.onStorageUpdate);
   },
   watch: {
     address(newAddress) {
@@ -479,67 +421,12 @@ export default {
       const signature = await this.fetchSignature(token);
       localStorage.address = this.recoverAddress(signature);
       this.address = localStorage.address;
-      history.pushState("", document.title, "/");
     } else if (path == "reset" || path == "resetAll") {
       localStorage.clear();
       this.signOut();
-      if (path == "resetAll") {
-        await (await dbPromise).clear("tokenUris");
-        await (await dbPromise).clear("tokenPngs");
-      }
-      history.pushState("", document.title, "/");
     } else if (path) {
       console.log("got path", path);
-      const txHash = url.get("tx");
-      if (!txHash) {
-        console.error("No TX hash");
-        return;
-      }
-      const receipt = await this.waitForReceipt(txHash);
-      history.pushState("", document.title, "/");
-      if (receipt.success == false) {
-        console.error("TX failed", receipt);
-        return;
-      }
-      if (path == "generate" || path == "regenerate") {
-        let tokenId = null;
-        for (const event of receipt.events) {
-          if (event.event == "GeneratedArt") {
-            tokenId = event.args[1];
-            console.log("generated", tokenId);
-          } else if (
-            event.event == "Transfer" &&
-            event.args[1] == this.address
-          ) {
-            tokenId = event.args[2];
-            this.inft.tokensOwned.push(tokenId);
-            console.log("transferred", tokenId);
-            break;
-          }
-        }
-        if (tokenId == null || tokenId == ZERO_TOKEN) {
-          console.error("Failed to get tokenId", tokenId);
-          return;
-        }
-        await this.fetchTokenUris([tokenId], true);
-        this.inft.balance = await this.conn.getTokenBalance(this.address);
-        this.inft.minted = await this.conn.getMintedBy(this.address);
-      } else if (path == "transferFrom" || path == "burn") {
-        if (receipt.success) {
-          this.inft.balance -= 1;
-          const transferArgs = receipt.events[0].args;
-          if (transferArgs[1] != this.address.toString()) {
-            this.inft.tokensOwned = this.inft.tokensOwned.filter(
-              (token) => token != transferArgs[2]
-            );
-          }
-        }
-      }
     }
-  },
-  destroyed: function () {
-    console.log("destroyed");
-    this.conn.stop();
   },
 };
 </script>
@@ -559,8 +446,7 @@ header {
   display: flex;
   flex-direction: row;
   background-color: white;
-/* border-bottom: solid red 1px; */
-box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.1);
 }
 
 nav{
