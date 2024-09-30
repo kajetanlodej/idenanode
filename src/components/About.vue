@@ -4,7 +4,6 @@
     <h1>Services</h1>
     <span>
 Idenanode.com offers two main services: shared node access, connecting users to the Idena blockchain without the need to manage their own node, and mining node delegation, enabling users to delegate their identity for participation in network security. Shared node access can be purchased through the official shared node marketplace built into the Idena web app.</span>
-
 </div>
     <div class="section">
     <h1>Rewards distribution</h1>
@@ -24,7 +23,6 @@ No keys are transferred to the pool, but the owner can manage delegated identiti
 </template>
 
 <style scoped>
-
 #aboutwrapper{
     display: flex;
     justify-content: center;
@@ -33,9 +31,7 @@ No keys are transferred to the pool, but the owner can manage delegated identiti
     width: 100vw;
     flex-direction: column;
     font-family: 'Lexend Exa', sans-serif;
-    /* padding-bottom: 50px; */
 }
-
 
 a {
   color: #0866ff;
@@ -70,24 +66,18 @@ h1{
 #aboutwrapper{
   padding-bottom: 10vh;
 }
-
-/* #first-section{
-  margin-top: 100px;
-} */
 .section{
     width: 80%;
     font-size: 1.2rem;
     padding: 15px;
       overflow-y: scroll;
       max-height: 140px;
-
 }
 h1{
   font-size: 1.7rem;
   margin-bottom: 5px;
   margin-top:0px;
 }
-
 }
 
 </style>

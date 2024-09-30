@@ -57,11 +57,7 @@
       </div>
     </div>
     <div id="delegation">
-    
-    <!-- <p>Delegate using official <a href="https://app.idena.io" target="_blank">Idena web app</a></p> -->
-    <!-- <button class="button" type="button" @click="delegate">DELEGATE</button> -->
      <div class="spinner-border text-primary" role="status">
-  <!-- <span class="visually-hidden">Loading...</span> -->
 </div>
     <span id="currentStatus" style="margin-bottom:2px" v-if="loggedAddress!== null && delegatee === null"> You are currently not delegating to any pool</span>
 <span id="currentStatus" style="margin-bottom:2px" v-if="loggedAddress !== null && delegatee !== null">
@@ -105,7 +101,6 @@
     </span>  
       <span v-if="myDelegatee" class="loader"></span>
 
-      <!-- <span>from current pool</span> -->
     </button>
 
     <!-- logged out -->
@@ -118,27 +113,14 @@
     >
       <span class="mainButton nav-text">DELEGATE</span>
       <span class="subButton nav-text">TO IDENANODE POOL</span>
-
     </button>
-<!-- <div class="spinner-border" role="status">
-  <span class="sr-only">Loading...</span>
-</div> -->
-    <!-- <div id="title">
-        <h3>DELEGATION ADDRESS</h3>
-        
-    </div> -->
-    <!-- <div id ="address">
-      0x4AE59825651D492134fc67ED1DD459E4F006CF93
-    </div> -->
     <a style="margin-top:2px" v-if="delegatee != poolAddress" href="https://scan.idena.io/pool/0x4AE59825651D492134fc67ED1DD459E4F006CF93" target="_blank">Idenanode pool details</a>
     </div>
-
     <div id="countdowns">
       <div id="titles">
         <div id="left">Mining rewards distribution</div>
         <div id="right">Validation rewards distribution</div>
       </div>
-
       <div id ="validation">
         <span id="clock">{{ this.miningCountdown }}</span>
         <span id="clock">{{ this.validationCountdown}}</span>
@@ -150,7 +132,6 @@
 <script>
 import { mapActions } from 'vuex';
 import { mapState } from 'vuex'
-import axios from 'axios'
 import {
   POOL_ADDRESS,
 } from "../config.js";
@@ -164,14 +145,12 @@ import {
   bufferToHex,
   toBuffer,
 } from "ethereumjs-util";
-import { Buffer } from "buffer";
 import { BN } from "bn.js";
 import * as proto from "../proto/models_pb.js";
 
 export default {
   data() {
       const conn = new Conn(this.connected, NODE_URL, NODE_KEY);
-
     return {
       poolAddress: null, // Initialize as null to avoid undefined access
       popupOpen: false,
@@ -188,7 +167,6 @@ export default {
       allTransactionsFetched: false,
       totalDelegators: 0,
       dataLoaded: false,
-      // Staking stats
       weight: null,
       totalShares: null,
       averageMinerWeight: null,
@@ -200,13 +178,11 @@ export default {
       epochNum: null,
       epochTime: {},
       STAKING_POWER: 0.9,
-      //amountValue: 100000, //change to take into account the amount of the user
       transactions: [],
       delegateFound: false,
     }
   },
     created() {
-    // Set the POOL_ADDRESS after component creation
     this.poolAddress = POOL_ADDRESS;
   },
   computed: {
@@ -224,20 +200,8 @@ export default {
       delegationPopup: (state) => state.delegationPopup,
       myDelegatee: (state) => state.myDelegatee,
     }),
-    isMyPoolDelegatee() {
-      console.log("1 i 2",this.delegatee, POOL_ADDRESS);
-      console.log("rownasie",this.delegatee === POOL_ADDRESS)
-      return this.delegatee === POOL_ADDRESS;
-    }
   },
-
   mounted() {
-    // this.fetchValidationTime();
-    // this.startCountdown();
-    this.fetchDelegators();
-    this.fetchTotalDelegators();
-    // this.getData();
-    this.fetchTransactions();
 
   },
   methods: {
@@ -247,101 +211,80 @@ export default {
       {
         index: 0,
         format: "hex",
-        value: this.loggedAddress, // Assuming the sender's address needs to be included
+        value: this.loggedAddress,
       },
     ];
-    // console.log(this.loggedAddress,"ADDDDDDDD");
     await this.buildTx("delegate", argsArray, 0x12);
 },
 ...mapActions(['updateDelegationPopup', 'updateDelegateeCheck','updateDelegatee']),
-async handleDelegateClick() {
+    async handleDelegateClick() {
       this.updateDelegationPopup(true);
-      console.log("popup CZY JEST ODPALONY???????",this.delegationPopup)
-      // this.popupOpen = true;
       await this.sendDelegateTx();
-      // console.log("PENDING TXSSSSSSSSSSSSSSSS",this.pendingTxsss )
-      // this.pendingTxsss = (await this.conn.getPendingTx("0x71eecdf6414eda0be975c2b748a74ca5018460e4"));
-      // console.log("PENDING TXSSSSSSSSSSSSSSSS",this.pendingTxsss )
     },
     async handleUnDelegateClick() {
       this.updateDelegationPopup(true);
-      // this.popupOpen = true;
       await this.sendUnDelegateTx();
-
     },
     sendUnDelegateTx: async function () {
-
         const argsArray = [
           {
             index: 0,
             format: "hex",
-            value: this.loggedAddress, // Assuming the sender's address needs to be included
+            value: this.loggedAddress,
           },
         ];
-        // console.log(this.loggedAddress,"ADDDDDDDD");
         await this.buildTx("undelegate", argsArray, 0x13);
     },
-
     checkPendingTxs: async function () {
   try {
     // Fetch the latest pending transactions
     this.txgenerated = await this.conn.getPendingTx({
       address: this.loggedAddress // Assuming 'address' is a required field
     });
-
     let delegateFound = false;
-
     // Check if transactions are present and valid
     if (this.txgenerated && this.txgenerated.transactions ) {
       for (let tx of this.txgenerated.transactions) {
         if (tx.type === "delegate" && tx.to === POOL_ADDRESS) {
-          console.log("Transaction found:", tx);
+          // console.log("Transaction found:", tx);
           delegateFound = true;
           this.updateDelegateeCheck(true);
           this.updateDelegatee(tx.to);
-          console.log("updateDelegateeCheck",this.myDelegatee);
-          break; // Exit loop once a matching delegate transaction is found
+          // console.log("updateDelegateeCheck",this.myDelegatee);
+          break;
         }
-
         if ( tx.type === "undelegate") {
           this.updateDelegatee(null);
           this.updateDelegateeCheck(true);
           delegateFound = true;
-
         }
       }
-
       // If no matching delegate transaction is found, clear the interval
       if (!delegateFound) {
-        console.log("No matching delegate transaction found, clearing interval.");
+        // console.log("No matching delegate transaction found, clearing interval.");
         this.updateDelegationPopup(false);
-        console.log(this.delegationPopup)
+        // console.log(this.delegationPopup)
         this.updateDelegateeCheck(false);
 
       }
     } else {
-      console.log("No transactions or response is invalid, clearing interval.");
-      console.log("status", this.delegationPopup);
+      // console.log("No transactions or response is invalid, clearing interval.");
+      // console.log("status", this.delegationPopup);
       this.updateDelegateeCheck(false);
       this.updateDelegationPopup(false);
-      console.log("status", this.delegationPopup);
+      // console.log("status", this.delegationPopup);
 
     }
   } catch (error) {
     console.error("Error fetching pending transactions:", error);
     this.updateDelegationPopup(false);
-    console.log(this.delegationPopup)
+    // console.log(this.delegationPopup)
     this.updateDelegateeCheck(false);
-
-
   }
-
     },
-
-  buildTx: async function (method, args, TxType, amountInt = 0) {
+  buildTx: async function (method, args, TxType) {
       const windowFeatures = "left=100,top=100,width=400,height=700";
       var popup = window.open("", "_blank",windowFeatures);
-
        const popupCheckInterval = setInterval(async () => {
   if (this.delegationPopup && !popup.closed) {
     console.log("Popup is open");
@@ -351,74 +294,39 @@ async handleDelegateClick() {
     await this.checkPendingTxs();
     if (this.delegationPopup === true) {
       const pendingTxsInterval = setInterval(async () => {
-
-
         await this.checkPendingTxs();
-
         if (this.delegationPopup === false) {
           clearInterval(pendingTxsInterval);
         }
-
       }, 5000);
     }
-
-    // setInterval(this.checkPendingTxs, 5000);
-    // this.updateDelegationPopup(false); //moment kiedy zamykamy popupa
   }
 }, 1000);
-
-
-      this.generating = true;
-
-      console.log(this.generating,"generating");
-      console.log(method, args);
       try {
-        // const nonce = this.addressNonce + 1;
-        // console.log("nonce", nonce);
         const maxFeeInt = 1e18;
-        console.log("maxFeeInt", maxFeeInt);
-        const maxFee = new BN(maxFeeInt.toString());
-        // const payload = proto.encodeProtoCallContractAttachment({
-        //   method,
-        //   args: argsToSlice(args),
-        // });
-        // console.log(payload);
-        // console.log(bufferToHex(payload));
-        const amount = new BN(`${amountInt}000000000000000000`);
-        const amountBytes = toBuffer(amount);
+        // console.log("maxFeeInt", maxFeeInt);
+        const maxFee = new BN(maxFeeInt.toString()); //TODO: change to the max fee
         const maxFeeBytes = toBuffer(maxFee);
-        console.log("amount", amount.toString(), amountBytes);
-        console.log("maxFee", maxFee.toString(), maxFeeBytes);
-
-        const addre = "0x71eecdf6414eda0be975c2b748a74ca5018460e4"; //TODO: change to the address of the pool
+        const addre = POOL_ADDRESS; 
         this.epoch = (await this.conn.getEpoch()).epoch;
         this.nonce = (await this.conn.getBalance(this.loggedAddress)).nonce + 1;
-// this.txgenerated = await this.conn.getPendingTx({
-//   address: this.loggedAddress, // Assuming 'address' is a required field
-//   // Include other properties that might be required by the api.TransactionsArgs structure
-// });        console.log("txgenerated", this.txgenerated.transactions);
-        console.log("nonce", this.nonce);
-        console.log("lolz",this.epoch);
         const txData = {
   type: TxType,
   maxFee: maxFeeBytes, //todo 
   nonce: this.nonce,
   epoch: this.epoch,
 };
-
 if (method !== "undelegate") {
   txData.to = toBuffer(addre);
 }
-
 const tx = proto.encodeProtoTransaction({
   data: txData,
 });
         const serialized = bufferToHex(tx);
-        console.log("serialized", serialized);
-        const page_url =
-          location.protocol + "//" + location.host + location.pathname;
+        // console.log("serialized", serialized);
+        const page_url = location.protocol + "//" + location.host + location.pathname;
         const callback_url = encodeURIComponent(page_url);
-        console.log("callback", callback_url);
+        // console.log("callback", callback_url);
         const url = `https://app.idena.io/dna/raw?tx=${serialized}
         &callback_url=${callback_url}?method=${method}`;
         popup.location = url;
@@ -426,237 +334,12 @@ const tx = proto.encodeProtoTransaction({
         popup.close();
         console.error(e);
       }
-      this.generating = false;
-      console.log(this.generating,"generating");
-
     },
-    async getData() {
-      try {
-        const coinsResponse = await axios.get('https://api.idena.io/api/coins');
-        const stakingResponse = await axios.get('https://api.idena.io/api/staking');
-        const onlineResponse = await axios.get('https://api.idena.io/api/onlineminers/count');
-        const epochResponse = await axios.get('https://api.idena.io/api/epoch/last');
-        const epochNumber = epochResponse.data.result.epoch - 1;
-        const prevEpochResponse = await axios.get(`https://api.idena.io/api/epoch/${epochNumber}`);
-        const rewardsResponse = await axios.get(`https://api.idena.io/api/epoch/${epochNumber}/rewardssummary`);
-        const epochStart = new Date(prevEpochResponse.data.result.validationTime);
-        const epochEnd = new Date(epochResponse.data.result.validationTime);
-        const nowDate = new Date();
-        const epochDuration = Math.round(Math.abs((epochEnd.getTime() - epochStart.getTime()) / 86400000));
-        const epochDurationMinutes = epochDuration * 24 * 60;
-        const epochLeftMinutes = Math.round(Math.max(0, ((epochEnd.getTime() - nowDate.getTime()) / 86400000) * 24 * 60));
-        const epochLeftPercent = Math.min(99, (epochLeftMinutes / epochDurationMinutes) * 100);
-        const epochLeft = epochLeftMinutes < 60 ? epochLeftMinutes : epochLeftMinutes > 24 * 60 ? Math.round(epochLeftMinutes / 24 / 60) : Math.round(epochLeftMinutes / 60);
-        const epochLeftUnit = epochLeftMinutes < 60 ? 'Minutes' : epochLeftMinutes > 24 * 60 ? 'Days' : 'Hours';
-
-        this.weight = stakingResponse.data.result.weight;
-        this.totalShares = stakingResponse.data.result.minersWeight;
-        this.averageMinerWeight = stakingResponse.data.result.averageMinerWeight;
-        this.rewardFund = {
-          extraFlips: rewardsResponse.data.result.extraFlips,
-          invitations: rewardsResponse.data.result.invitations,
-        };
-        this.rewardWeight = {
-          extraFlips: stakingResponse.data.result.extraFlipsWeight,
-          invitations: stakingResponse.data.result.invitationsWeight,
-        };
-        this.onlineSize = onlineResponse.data.result;
-        this.epochRewardFund = rewardsResponse.data.result.staking && rewardsResponse.data.result.staking > 0 ? rewardsResponse.data.result.staking : rewardsResponse.data.result.validation * this.STAKING_POWER;
-        this.totalStake = coinsResponse.data.result.totalStake;
-        this.epochNum = epochResponse.data.result.epoch;
-        this.epochTime = {
-          epochDuration,
-          epochLeftPercent,
-          epochLeft,
-          epochLeftUnit,
-        };
-      } catch (e) {
-        console.error('cannot fetch API', e);
-      }
-    },
-    calculateEstimatedMiningReward(stakeWeight, averageMinerWeight, onlineMinersCount, epochDays) {
-    const proposerOnlyReward = (6 * stakeWeight * 20) / (stakeWeight * 20 + averageMinerWeight * 100);
-    const committeeOnlyReward = (6 * stakeWeight) / (stakeWeight + averageMinerWeight * 119);
-    const proposerAndCommitteeReward = (6 * stakeWeight * 21) / (stakeWeight * 21 + averageMinerWeight * 99);
-
-    const proposerProbability = 1 / onlineMinersCount;
-    const committeeProbability = Math.min(100, onlineMinersCount) / onlineMinersCount;
-
-    const proposerOnlyProbability = proposerProbability * (1 - committeeProbability);
-    const committeeOnlyProbability = committeeProbability * (1 - proposerProbability);
-    const proposerAndCommitteeProbability = proposerOnlyProbability * committeeOnlyProbability;
-
-    return ((85000 * epochDays) / 21.0) * (proposerOnlyProbability * proposerOnlyReward + committeeOnlyProbability * committeeOnlyReward + proposerAndCommitteeProbability * proposerAndCommitteeReward);
-  },
-    calcStakingReward(amount) {
-    return (amount ** this.STAKING_POWER / (amount ** this.STAKING_POWER + this.weight)) * this.epochRewardFund;
-  },
-  calcExtraFlipReward(amount) {
-    return (amount ** this.STAKING_POWER / this.rewardWeight.extraFlips) * this.rewardFund.extraFlips;
-  },
-  calcInvitationReward(amount) {
-    return (amount ** this.STAKING_POWER / this.rewardWeight.invitations) * this.rewardFund.invitations;
-  },
-  calcMiningReward(amount) {
-    const myStakeWeight = amount ** this.STAKING_POWER;
-    return this.calculateEstimatedMiningReward(myStakeWeight, this.averageMinerWeight, this.onlineSize, this.epochTime.epochDuration);
-  },
-
-    async fetchValidationTime() {
-      try {
-        const response = await axios.get('https://api.idena.io/api/Epoch/Last');
-        const validationTime = new Date(response.data.result.validationTime);
-        validationTime.setMinutes(validationTime.getMinutes() + 45);
-        this.validationTime = validationTime;
-        this.startValidationCountdown();
-      } catch (error) {
-        console.error('Error fetching validation time:', error);
-      }
-    },
-    startValidationCountdown() {
-      this.countdownInterval = setInterval(() => {
-        const now = new Date();
-        const timeDifference = this.validationTime - now;
-        let timeInSeconds = Math.floor(timeDifference / 1000);
-
-        if (timeInSeconds <= 0) {
-          clearInterval(this.countdownInterval);
-          this.countdown1 = '00:00:00:00';
-          return;
-        }
-
-        const days = Math.floor(timeInSeconds / (3600 * 24));
-        const hours = Math.floor((timeInSeconds % (3600 * 24)) / 3600);
-        const minutes = Math.floor((timeInSeconds % 3600) / 60);
-        const seconds = timeInSeconds % 60;
-
-        this.countdown1 = `${this.formatTime(days)}:${this.formatTime(hours)}:${this.formatTime(minutes)}:${this.formatTime(seconds)}`;
-      }, 1000);
-    },
-  
-    startCountdown() {
-      this.countdownInterval = setInterval(() => {
-        const now = new Date();
-        const nowUTC = new Date(now.toISOString().slice(0, -1) + 'Z');
-        const nextSixAMUTC = new Date(nowUTC);
-
-        if (nowUTC.getUTCHours() >= 6) {
-          nextSixAMUTC.setUTCDate(nowUTC.getUTCDate() + 1);
-        }
-        nextSixAMUTC.setUTCHours(6, 0, 0, 0);
-
-        const timeDifference = nextSixAMUTC - nowUTC;
-        let timeInSeconds = Math.floor(timeDifference / 1000);
-
-        const hours = Math.floor(timeInSeconds / 3600);
-        const minutes = Math.floor((timeInSeconds % 3600) / 60);
-        const seconds = timeInSeconds % 60;
-
-        this.countdown = `${this.formatTime(hours)}:${this.formatTime(minutes)}:${this.formatTime(seconds)}`;
-
-        if (timeInSeconds <= 0) {
-          clearInterval(this.countdownInterval);
-          this.countdown = '00:00:00';
-          this.startCountdown(); // Restart the countdown for the next day
-        }
-      }, 1000);
-    },
-    formatTime(time) {
-      return time.toString().padStart(2, '0')
-    },
-    getPoolStats() {
-      const apiUrl = 'https://api.idena.io/api/Pool/0x4FF1F5764d4a5845E30d208717432C1d4Cac3399'
-      axios
-        .get(apiUrl)
-        .then((response) => {
-          if (response && response.data && response.data.result) {
-            this.delegatorsCount = response.data.result.size
-            this.totalStake = Math.floor(response.data.result.totalStake)
-          }
-          console.log('Delegators count:', this.delegatorsCount)
-        })
-        .catch((error) => {
-          console.error('Error fetching delegators count:', error)
-        })
-    },
-    tabClicked (selectedTab) {
-      console.log('Current tab re-clicked:' + selectedTab.tab.name)
-    },
-    tabChanged (selectedTab) {
-      console.log('Tab changed to:' + selectedTab.tab.name)
-    },
-    async fetchDelegators() {
-  const response = await axios.get(`https://api.idena.io/api/Pool/0x17b851A11f7d37054928BEf47F0F22166d433917/Delegators`, {
-    params: {
-      limit: this.limit,
-      continuationToken: this.continuationToken,
-    },
-  });
-
-  // Filter out the 'length' property
-  const delegators = response.data.result.filter(item => item !== 'length');
-
-  this.delegators = [...this.delegators, ...delegators];
-  console.log(delegators);
-  console.log(delegators.length)
-  if (response.data.continuationToken) {
-    this.continuationToken = response.data.continuationToken;
-  } else {
-    this.allDelegatorsFetched = true;
-  }
-  this.dataLoaded = true;
-},
-  async fetchTotalDelegators() {
-    const response = await axios.get(`https://api.idena.io/api/Pool/0x17b851A11f7d37054928BEf47F0F22166d433917/Delegators/Count`);
-    this.totalDelegators = response.data.result;
-    console.log(response.data.result);
-  },
-  fetchMoreDelegators() {
-    if (!this.allDelegatorsFetched) {
-      this.fetchDelegators();
-    }
-  },
-  fetchMoreTransactions() {
-    if (!this.allTransactionsFetched) {
-      this.fetchTransactions();
-    }
-  },
-  async fetchTransactions() {
-    const response = await axios.get(`https://api.idena.io/api/Address/0x344a09ec5b9b5debc5a889837c50c66c8a78f04d/Txs`, {
-    params: {
-      limit: this.limit,
-      continuationToken: this.continuationToken,
-    },
-  });
-      const transactions = response.data.result
-      console.log(transactions);
-
-      this.transactions = [...this.transactions, ...transactions];
-      console.log(transactions);
-      if (response.data.continuationToken) {
-    this.continuationToken = response.data.continuationToken;
-  } else {
-    this.allTransactionsFetched = true;
-  }
-  this.dataLoaded = true;
-      // this.canFetchMore = !!response.continuationToken;
-    },
-
-
   }
 }
-
 </script>
 
 <style scoped>
-/* h2,h1{
-  color:white;
-} */
-
-/* span {
-  color: white;
-} */
-
 #wrapper-delegation {
   width: 100vw;
   display: flex;
@@ -666,7 +349,6 @@ const tx = proto.encodeProtoTransaction({
   font-family: "Lexend Exa", sans-serif;
   color: #131313;
   justify-content: center;
-
 }
 
 #delegation {
@@ -690,77 +372,10 @@ const tx = proto.encodeProtoTransaction({
   color: white;
 }
 
-#poolStats {
-  width: 50%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-size: 1rem;
-  margin-top: 2rem;
-  font-weight: 600;
-  color: white;
-}
-
 #clock {
   font-size: 3rem;
   font-weight: 200;
   color: #131313 ;
-}
-
-#delegationStatus {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-size: 1.2rem;
-  margin-top: 2rem;
-  font-weight: 600;
-  color: white;
-}
-
-#aboutDelegation {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-size: 1rem;
-  margin-top: 2rem;
-  font-weight: 600;
-  color: white;
-}
-
-
-
-#identityStats {
-  width: 50%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-size: 1rem;
-  margin-top: 2rem;
-  font-weight: 600;
-  color: white;
-  border-right: solid;
-}
-
-#poolStats {
-  width: 50%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-size: 1rem;
-  margin-top: 2rem;
-  font-weight: 600;
-  color: white;
-}
-
-#stats {
-  width: 100%;
-  display: flex;
-  flex-direction: row;
-  font-size: 1rem;
-  margin-top: 2rem;
-  font-weight: 600;
-  color: white;
-  justify-content: center;
 }
 
 #countdowns {
@@ -776,70 +391,28 @@ const tx = proto.encodeProtoTransaction({
 }
 
 #validation {
-
   width: 80%;
   display: flex;
   justify-content: space-between;
   flex-direction: row;
 }
+
 #titles{
   width: 80%;
   display: flex;
   justify-content: space-between;
   flex-direction: row;
-
 }
 
-#mining {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-}
-
-#divider {
-  width: 100%;
-  margin: 2px;
-}
-.container {
-  margin-top: 2rem;
-  width: 100%;
-  height: 40%;
-  color: white;
-}
-#user {
-  display: flex;
-  align-items: center;
-}
-.rowElement {
-  vertical-align: middle;
-}
 th {
   font-weight: 600;
 }
+
 button:disabled {
   background-color: #cccccc;
   color: #666666;
 }
-.user-pic {
-  margin-right: 10px;
-  border-radius: 50%;
-  background-color: white;
-}
-.tab-content {
-  --s: 30px; /* the size on the corner */
-  --t: 1px; /* the thickness of the border */
-  --g: 20px; /* the gap between the border and image */
 
-  /* padding: calc(var(--g) + var(--t));
-  outline: var(--t) solid white; 
-  outline-offset: calc(-1*var(--t));
-  mask:
-    conic-gradient(at var(--s) var(--s),#0000 75%,#000 0)
-    0 0/calc(100% - var(--s)) calc(100% - var(--s)),
-    linear-gradient(#000 0 0) content-box; */
-  /* transition: .4s; */
-}
 #prediction {
   height: 400px;
   display: flex;
@@ -859,19 +432,23 @@ button:disabled {
   width: 100%;
   text-align: center;
 }
+
 #stakeApy,
 #values {
   width: 80%;
   display: flex;
   justify-content: space-between;
 }
+
 #values {
   font-size: 3rem;
   font-weight: 600;
 }
+
 #stakeApy {
   color: grey;
 }
+
 #calculation {
   width: 60%;
   display: flex;
@@ -884,12 +461,11 @@ button:disabled {
   display: flex;
   justify-content: space-between;
 }
+
 #total {
   font-size: 1.75rem;
 }
-.nav-tabs {
-  border-bottom: none;
-}
+
 a {
   color: #0866ff;
   text-decoration: none;
@@ -903,19 +479,21 @@ a:hover {
 a:active {
   color: #011531; /* Change the link color when it's active */
 }
+
 #address {
   margin-bottom: 0px;
   font-size: 1.9rem;
   font-weight: 500;
-
 }
 
 #left{
   text-align: left;
 }
+
 #right{
   text-align: right;
 }
+
 .button {
   align-items: center;
   background-color: #0A66C2;
@@ -959,10 +537,12 @@ a:active {
   background: rgba(0, 0, 0, .08);
   color: rgba(0, 0, 0, .3);
 }
+
 h3{
   margin-top: 0px;
   margin-bottom: 40px;
 }
+
 @media (max-width: 768px) {
 #prediction{
   width: 100%;
@@ -982,11 +562,9 @@ h3{
   margin-top: 0px;
   margin-bottom: 20px;
 }
-
 #calculation{
   width: 80%;
 }
-
 #total{
   font-size: 1.3rem;
 }
@@ -997,28 +575,25 @@ h3{
 #delegation{
   height: 150px;
 }
-
 #currentStatus {
   font-size: 1.2rem;
 }
-
 #clock{
   font-size: 1.7rem; 
 }
-
 #currentStatus {
 display: flex;
 flex-direction: column;
 justify-content: center;
 align-items: center;
 }
-
 }
 
 .buttonText{
   display: flex;
   flex-direction: column;  
 }
+
 .loader {
     width: 24px;
     height: 24px;
@@ -1028,7 +603,6 @@ align-items: center;
     box-sizing: border-box;
     animation: rotation 1s linear infinite;
     }
-
     @keyframes rotation {
     0% {
         transform: rotate(0deg);

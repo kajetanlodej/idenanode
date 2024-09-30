@@ -2,11 +2,13 @@
 import { RouterLink, RouterView } from 'vue-router'
 import Identity from "./components/Identity.vue";
 import { Conn } from "./connection.js";
+import { mapActions } from 'vuex';
 import {
   CALLBACK_URL,
   NODE_URL,
   NODE_KEY,
   AUTH_WORKER_URL,
+  POOL_ADDRESS,
 } from "./config.js";
 import {
   bufferToHex,
@@ -63,19 +65,16 @@ import axios from 'axios'
       <Identity :identity="identity" @signOut="signOut" @signIn="signIn" />
       <div id = "media" class="media">
         <a href="https://github.com/kajetanlodej/idenanode" target="_blank">
-    <i class="fa fa-github"></i>
-</a>
+          <i class="fa fa-github"></i>
+        </a>
         <i class="fa fa-telegram" ></i>
       </div>
   </header>
   <RouterView/>
 </div>
 </template>
+
 <script>
-import { mapActions } from 'vuex';
-
-// import { update } from 'cypress/types/lodash';
-
 export default {
   name: "App",
   components: {
@@ -107,7 +106,6 @@ export default {
       var popup = window.open("", "_blank",windowFeatures);
       popup.location = url;
     },
-
     fetchSignature: async function (token) {
       window.document.body.style.visibility = "hidden";
       const response = await fetch(
@@ -170,44 +168,11 @@ export default {
         ];
         await this.buildTx("delegate", argsArray, 0x13);
     },
-  buildTx: async function (method, args, TxType, amountInt = 0) {
-      var popup = window.open("", "_blank");
-      try {
-        const maxFeeInt = 1e18;
-        const maxFee = new BN(maxFeeInt.toString());
-        const amount = new BN(`${amountInt}000000000000000000`);
-        const amountBytes = toBuffer(amount);
-        const maxFeeBytes = toBuffer(maxFee);
-        const addre = "0x71eecdf6414eda0be975c2b748a74ca5018460e4";
-        this.epoch = (await this.conn.getEpoch()).epoch;
-        this.nonce = (await this.conn.getBalance(this.address)).nonce + 1;
-        const tx = proto.encodeProtoTransaction({
-          data: {
-            type: TxType,
-            to: toBuffer(addre),
-            amount: amountBytes,
-            maxFee: maxFeeBytes,
-            nonce: this.nonce,
-            epoch: this.epoch,
-          },
-        });
-        const serialized = bufferToHex(tx);
-        const page_url =
-          location.protocol + "//" + location.host + location.pathname;
-        const callback_url = encodeURIComponent(page_url);
-        const url = `https://app.idena.io/dna/raw?tx=${serialized}
-        &callback_url=${callback_url}?method=${method}`;
-        popup.location = url;
-      } catch (e) {
-        popup.close();
-        console.error(e);
-      }
-    },
     ...mapActions(['updateStake', 'updateDelegatee','updateLoggedAddress','updateMiningReward','updateStakingReward','updateExtraFlipReward','updateInvitationReward','updateApy','updateMiningDistributionCountdown','updateStakingDistributionCountdown','updateDelegateeCheck','updateGlobeInicialized']),
     initAddress: async function () {
-      console.log("initAddress");
+      // console.log("initAddress");
       if (this.address) {
-        console.log("address", this.address);
+        // console.log("address", this.address);
         this.identity = await this.conn.getIdentity(this.address);
         this.updateLoggedAddress(this.address);
         this.updateDelegatee(null); //Fix the empty delegatee
@@ -229,7 +194,6 @@ export default {
         console.error('Error fetching validation time:', error);
       }
     },
-    
     startValidationCountdown() {
       this.countdownInterval = setInterval(() => {
         const now = new Date();
@@ -249,28 +213,22 @@ export default {
         this.updateStakingDistributionCountdown(this.countdown1);
       }, 1000);
     },
-  
     startCountdown() {
       this.countdownInterval = setInterval(() => {
         const now = new Date();
         const nowUTC = new Date(now.toISOString().slice(0, -1) + 'Z');
         const nextSixAMUTC = new Date(nowUTC);
-
         if (nowUTC.getUTCHours() >= 6) {
           nextSixAMUTC.setUTCDate(nowUTC.getUTCDate() + 1);
         }
         nextSixAMUTC.setUTCHours(6, 0, 0, 0);
-
         const timeDifference = nextSixAMUTC - nowUTC;
         let timeInSeconds = Math.floor(timeDifference / 1000);
-
         const hours = Math.floor(timeInSeconds / 3600);
         const minutes = Math.floor((timeInSeconds % 3600) / 60);
         const seconds = timeInSeconds % 60;
-
         this.countdown = `${this.formatTime(hours)}:${this.formatTime(minutes)}:${this.formatTime(seconds)}`;
         this.updateMiningDistributionCountdown(this.countdown);
-
         if (timeInSeconds <= 0) {
           clearInterval(this.countdownInterval);
           this.countdown = '00:00:00';
@@ -283,7 +241,6 @@ export default {
     formatTime(time) {
       return time.toString().padStart(2, '0')
     },
-
     async getData() {
       try {
         const coinsResponse = await axios.get('https://api.idena.io/api/coins');
@@ -302,7 +259,6 @@ export default {
         const epochLeftPercent = Math.min(99, (epochLeftMinutes / epochDurationMinutes) * 100);
         const epochLeft = epochLeftMinutes < 60 ? epochLeftMinutes : epochLeftMinutes > 24 * 60 ? Math.round(epochLeftMinutes / 24 / 60) : Math.round(epochLeftMinutes / 60);
         const epochLeftUnit = epochLeftMinutes < 60 ? 'Minutes' : epochLeftMinutes > 24 * 60 ? 'Days' : 'Hours';
-
         this.weight = stakingResponse.data.result.weight;
         this.totalShares = stakingResponse.data.result.minersWeight;
         this.averageMinerWeight = stakingResponse.data.result.averageMinerWeight;
@@ -338,9 +294,6 @@ export default {
               ) * 100 / this.stake
             ) * 366
           ) / this.epochTime.epochDuration);
-
-
-
       } catch (e) {
         console.error('cannot fetch API', e);
       }
@@ -349,14 +302,11 @@ export default {
     const proposerOnlyReward = (6 * stakeWeight * 20) / (stakeWeight * 20 + averageMinerWeight * 100);
     const committeeOnlyReward = (6 * stakeWeight) / (stakeWeight + averageMinerWeight * 119);
     const proposerAndCommitteeReward = (6 * stakeWeight * 21) / (stakeWeight * 21 + averageMinerWeight * 99);
-
     const proposerProbability = 1 / onlineMinersCount;
     const committeeProbability = Math.min(100, onlineMinersCount) / onlineMinersCount;
-
     const proposerOnlyProbability = proposerProbability * (1 - committeeProbability);
     const committeeOnlyProbability = committeeProbability * (1 - proposerProbability);
     const proposerAndCommitteeProbability = proposerOnlyProbability * committeeOnlyProbability;
-
     return ((85000 * epochDays) / 21.0) * (proposerOnlyProbability * proposerOnlyReward + committeeOnlyProbability * committeeOnlyReward + proposerAndCommitteeProbability * proposerAndCommitteeReward);
   },
     calcStakingReward(amount) {
@@ -372,20 +322,18 @@ export default {
     const myStakeWeight = amount ** this.STAKING_POWER;
     return this.calculateEstimatedMiningReward(myStakeWeight, this.averageMinerWeight, this.onlineSize, this.epochTime.epochDuration);
   },
-
     onStorageUpdate(event) {
       if (event.key === "address") {
-        console.log("storage update", event.newValue);
+        // console.log("storage update", event.newValue);
         this.address = event.newValue;
       }
     },
-    
   },
   mounted() {
     this.fetchValidationTime();
     this.startCountdown();
     if (localStorage.address != null) {
-      console.log("address in storage", localStorage.address);
+      // console.log("address in storage", localStorage.address);
       if (isValidAddress(localStorage.address) == false) {
         console.warn("Invalid address in storage!");
         this.signOut();
@@ -397,9 +345,9 @@ export default {
   },
   watch: {
     address(newAddress) {
-      console.log("watch newAddress", newAddress);
+      // console.log("watch newAddress", newAddress);
       if (isValidAddress(newAddress) == false) {
-        console.warn("Invalid address!");
+        // console.warn("Invalid address!");
         this.signOut();
         return;
       }
@@ -413,7 +361,7 @@ export default {
     const path = location.pathname.slice(1);
     if (path == "signin") {
       const token = url.get("token");
-      console.log("sign in", token);
+      // console.log("sign in", token);
       if (!token) {
         console.error("No token");
         return;
@@ -425,13 +373,13 @@ export default {
       localStorage.clear();
       this.signOut();
     } else if (path) {
-      console.log("got path", path);
+      // console.log("got path", path);
     }
   },
 };
 </script>
 
-<style scoped> /*TODO: SCOPED?*/
+<style scoped>
 
 #wrapper{
   width: 100vw;
@@ -457,7 +405,6 @@ nav{
   justify-content: space-between;
   padding-left: 30px;
   padding-right: 200px
-  
 }
 
 nav a {
@@ -490,35 +437,44 @@ nav a.router-link-exact-active {
 
 .status-icon {
   display: none;
-  width: 16px; /* Original size */
-  height: 16px; /* Original size */
-  transform: scale(1.5); /* 2x scale */
+  width: 16px; 
+  height: 16px;
+  transform: scale(1.5);
 }
 .delegation-icon {
   display: none;
-  width: 16px; /* Original size */
-  height: 16px; /* Original size */
-  transform: scale(1.5); /* 2x scale */
+  width: 16px; 
+  height: 16px;
+  transform: scale(1.5);
 }
+
 .about-icon {
   display: none;
-  width: 16px; /* Original size */
-  height: 16px; /* Original size */
-  transform: scale(1.5); /* 2x scale */
+  width: 16px;
+  height: 16px;
+  transform: scale(1.5);
 }
 
 .status-text {
   display: inline-block;
 }
+
 .delegation-text {
   display: inline-block;
 }
+
 .status-text {
   display: inline-block;
 }
 
 #media{
-display: flex; flex-direction: row; height: 100%; align-items: center; justify-content: center; margin-top: 0px; margin-right: 15px; 
+display: flex; 
+flex-direction: row; 
+height: 100%; 
+align-items: center; 
+justify-content: center; 
+margin-top: 0px; 
+margin-right: 15px; 
 }
 
 @media (max-width: 768px) {
@@ -540,7 +496,6 @@ display: flex; flex-direction: row; height: 100%; align-items: center; justify-c
   nav{
     padding-left:15px;
   }
-
   .identity{
     margin-right: 0px;
     padding-right: 0px;
@@ -562,12 +517,10 @@ display: flex; flex-direction: row; height: 100%; align-items: center; justify-c
     display: inline-block;
     margin-right: 20px;
     margin-top: 5px;
-
   }
   i{
     margin-right: 0px;
   }
-
 }
 
 .menu-icon {
@@ -575,6 +528,7 @@ display: flex; flex-direction: row; height: 100%; align-items: center; justify-c
   font-size: 30px;
   cursor: pointer;
 }
+
 .fa-github{
   font-size:25px;color:#0866ff; height: 25px; width: 25px; margin-right: 0px; padding-left: 1px;
 }

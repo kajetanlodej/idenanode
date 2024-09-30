@@ -24,7 +24,6 @@
   </template>
   
   <style>
-@import url('https://fonts.googleapis.com/css2?family=Lexend+Exa:wght@400&display=swap');
 
 :root {
     --background: #010626;
@@ -41,6 +40,7 @@ html {
     width: 100vw;
     height: 100vh;
 }
+
 #homewrapper{
     width: 100vw;
     display: flex;
@@ -305,8 +305,6 @@ html {
   align-items: center;
   color:#0A66C2;
 }
-
-
 </style>
 
 <script >
@@ -329,7 +327,6 @@ export default {
       this.handleRefreshClick();
   },
   beforeUnmount() {
-  console.log('Cleaning globe before unmounting component');
   this.cleanupGlobe();
 },
   methods: {
@@ -346,15 +343,14 @@ export default {
       this.world.customLayerData([]);
     },
     initGlobe() {
-      console.log('Initializing globe')
-      const width = document.documentElement.clientWidth * 0.8;
-      const height = document.documentElement.clientHeight * 0.6;
+      const width = window.innerWidth * 0.8;
+      const height = window.innerHeight * 0.6;
       this.world = Globe({ animateIn: false, waitForGlobeReady: true })
         (document.getElementById('globeViz'))
         .width(width)
         .height(height)
-         .globeImageUrl(texture)
-        .pointOfView({ lat: 54, lng: 18, altitude: 1.69 }) // aim at Germany
+        .globeImageUrl(texture)
+        .pointOfView({ lat: 54, lng: 18, altitude: 1.69 })
         .polygonAltitude(0.05)
         .polygonCapColor(() => '#056CF2')
         .polygonSideColor(() => 'rgba(0, 0, 0, 0)')
@@ -423,18 +419,15 @@ export default {
         .catch(error => {
           console.error('Error fetching map data:', error);
         });
-        
     },
-    
     makeSyncingRequest() {
       const rpcEndpoint = 'https://idenanode.com';
       const payload = {
         method: 'bcn_syncing',
         params: [],
         id: 1,
-        key: '22ref1stat122',
+        key: NODE_KEY,
       };
-
       return axios.post(rpcEndpoint, payload)
         .then(response => response.data)
         .catch(error => {
@@ -451,13 +444,10 @@ export default {
           return 'rgba(0, 0, 0, 1)'; // Keep the shadow 0.6 opacity on refresh
         }
       });
-      
       this.makeSyncingRequest()
         .then(data => {
-          console.log(data);
           const labelColor = data.result.syncing ? '#FF681E' : '#00FF00';
           (this.world.labelsData())[0].color = labelColor;
-
           this.world.labelColor(d => {
             if (d.text === 'Germany' && d.color !== '#000000') {
               return 'rgba(0, 0, 0, 1)'; 
@@ -475,22 +465,19 @@ export default {
           const offlineColor = '#FF000D';
           this.world.labelColor(d => {
             if (d.text === 'Germany' && d.color !== '#000000') {
-              return 'rgba(0, 0, 0, 1)'; // Keep the 'Germany' label black
+              return 'rgba(0, 0, 0, 1)'; 
             } else if (d.text === 'Germany') {
               (this.world.labelsData())[2].color = '#000000';
-              return offlineColor; // Change color for the 'Another Label'
+              return offlineColor; 
             } else {
-              return d.color; // Keep other labels' color as is
+              return d.color;
             }
           });
         });
       this.makeSyncingRequestMining()
       .then (data => {
-        console.log("WYNIKKKKKKKKKKKKKKKKK",data.online)
         const labelColor = data.online ? '#00FF00' : '#FF000D';
-        console.log("LABEL COLOR", labelColor);
         (this.world.labelsData())[2].color = labelColor;
-        console.log("zmieniono kolor mining")
       })
     },
   },

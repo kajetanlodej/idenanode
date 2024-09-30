@@ -57,24 +57,14 @@
           <path fill-rule="evenodd" d="M6 12.5a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-8a.5.5 0 0 0-.5.5v2a.5.5 0 0 1-1 0v-2A1.5 1.5 0 0 1 6.5 2h8A1.5 1.5 0 0 1 16 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-8A1.5 1.5 0 0 1 5 12.5v-2a.5.5 0 0 1 1 0z"/>
   <path fill-rule="evenodd" d="M.146 8.354a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L1.707 7.5H10.5a.5.5 0 0 1 0 1H1.707l2.147 2.146a.5.5 0 0 1-.708.708z"/>
         </svg>
-          <!-- <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
-  <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
-</svg> -->
-          <!-- <b-icon-x /> --> 
         </button>
       </div>
     </div>
   </template>
   
   <script>
-  // X icon bootstrap-vue not compatibile with vue 3
-//   import { BIconX } from "bootstrap-vue";
-  
   export default {
     name: "Identity",
-    // components: {
-    //   BIconX,
-    // },
     props: {
       identity: Object,
     },
@@ -89,16 +79,11 @@
     },
   };
   </script>
-  
-  <style >
 
+  <style>
   .text-truncate{
     color:white;
   }
-  
-  /* #id-state{
-    color:white;
-  } */
   
   #signin{
     width: 50vw;
@@ -107,6 +92,7 @@
     justify-content: center;
     align-items: center;
   }
+
   .identity {
     height: 6vh;
     width: 100%;
@@ -120,30 +106,17 @@
     height: 40px;
     width: 40px;
     margin-right: 1.5rem;
-    
   }
   
   .avatar {
     height: 100%;
     width: 100%;
-    /* box-shadow: #09223b 0px 0px 1px 0px; */
     border-radius: 50%;
     background-color: #f0f2f5;
   }
   
   .address {
     color: grey;
-  }
-  
-  .conn-btn {
-    height: 3rem;
-  }
-  
-  .load-spinner {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: auto;
   }
   
   .button {
@@ -172,7 +145,6 @@
   -webkit-user-select: none;
   vertical-align: middle;
   border-radius: 7px;
-
 }
 
 .button:hover
@@ -191,44 +163,41 @@
   background: rgba(0, 0, 0, .08);
   color: rgba(0, 0, 0, .3);
 }
+
  .subButton {
   font-size: 10px;
-
-   margin-top: -2px;
+  margin-top: -2px;
 }
   
 .mainButton {
 margin-bottom: -2px;
 margin-top: 2px;
 }
+
 .signin-icon {
   display: none;
   width: 16px; /* Original size */
   height: 16px; /* Original size */
   transform: scale(1.5); /* 2x scale */
 }
+
 @media (min-width: 769px) {
-#button-signin {
-  width: 150px;
+  #button-signin {
+    width: 150px;
+  }
+  #button-signout{
+    width: 150px;
+  }
 }
 
-#button-signout{
-  width: 150px;
-
-}
-}
 @media (max-width: 768px) {
-  /* Adjust size for mobile view */
-    .button-text{
+  .button-text{
     display: none;
   }
-    .signin-icon{
+  .signin-icon{
     display: inline-block;
     margin-right: 4px;
   }
-
 }
-
-
   </style>
   
