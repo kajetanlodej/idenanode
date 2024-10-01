@@ -313,6 +313,7 @@ import Globe from 'globe.gl';
 import texture from '/src/assets/pobrane-jasne.png';
 import { POOL_ADDRESS, NODE_URL, NODE_KEY } from '@/config';
 import { Conn } from "@/connection";
+import simplifiedMap from '/src/assets/simplifiedmap.json';
 
 export default {
   data: function() {
@@ -409,16 +410,16 @@ export default {
         <div id="hoverTitle"><b>${d.desc}</b></div>
         </div>
       `)
-        .backgroundColor('#f0f2f5');
-    
-      fetch('/src/assets/simplifiedmap.geojson')
-        .then(res => res.json())
-        .then(countries => {
-          this.world.polygonsData(countries.features);
-        })
-        .catch(error => {
-          console.error('Error fetching map data:', error);
-        });
+        .backgroundColor('#f0f2f5')
+        .polygonsData(simplifiedMap.features);
+      // fetch('/src/assets/simplifiedmap.json')
+      //   .then(res => res.json())
+      //   .then(countries => {
+      //     this.world.polygonsData(countries.features);
+      //   })
+      //   .catch(error => {
+      //     console.error('Error fetching map data:', error);
+      //   });
     },
     makeSyncingRequest() {
       const rpcEndpoint = 'https://idenanode.com';
