@@ -15,7 +15,9 @@ coverage
 *.local
 
 # Editor directories and files
-.vscode/*
+.github
+.vscode/
+public
 !.vscode/extensions.json
 .idea
 *.suo
@@ -24,3 +26,4 @@ coverage
 *.sln
 *.sw?
 *.tsbuildinfo
+.eslintrc.cjs
