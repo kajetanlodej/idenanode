@@ -8,20 +8,16 @@ import {
   NODE_URL,
   NODE_KEY,
   AUTH_WORKER_URL,
-  POOL_ADDRESS,
 } from "./config.js";
 import {
   bufferToHex,
   ecrecover,
-  toBuffer,
   fromRpcSig,
   keccak256,
   pubToAddress,
   isValidAddress,
 } from "ethereumjs-util";
 import { Buffer } from "buffer";
-import { BN } from "bn.js";
-import * as proto from "./proto/models_pb.js";
 import axios from 'axios'
 </script>
 

@@ -14,7 +14,7 @@
           {{ amountValue }}
         </div>
 <div>
-  {{amountValue ? (isNaN(parseFloat(this.apy * 0.9)) ? '0.00' : parseFloat(this.apy * 0.9).toFixed(2)) : '0'}}
+  {{amountValue ? (isNaN(parseFloat(this.apy * 1)) ? '0.00' : parseFloat(this.apy * 1).toFixed(2)) : '0'}}
 </div>
 
       </div>
@@ -23,26 +23,26 @@
         <div class="rewards">
           <div>Mining reward:</div>
           <div>
-            {{parseFloat(this.miningReward * 0.9).toFixed(2)}} iDNA
+            {{parseFloat(this.miningReward * 1).toFixed(2)}} iDNA
           </div>
         </div>
         <div class="rewards">
           <div>Validation reward:</div>
           <div>
-            {{parseFloat(this.stakingReward * 0.9).toFixed(2)}} iDNA
+            {{parseFloat(this.stakingReward * 1).toFixed(2)}} iDNA
           </div>
         </div>
         <div class="rewards">
           <div>Extra flip reward:</div>
           <div>
-            {{parseFloat(this.extraFlipReward * 0.9).toFixed(2)}}
+            {{parseFloat(this.extraFlipReward * 1).toFixed(2)}}
             iDNA
           </div>
         </div>
         <div class="rewards">
           <div>Invitation reward:</div>
           <div>
-            {{parseFloat(this.invitationReward * 0.9).toFixed(2)}}
+            {{parseFloat(this.invitationReward * 1).toFixed(2)}}
             iDNA
           </div>
         </div>
@@ -50,7 +50,7 @@
         <div class="rewards" id="total">
           <div>Total epoch reward:</div>
           <div>
-            {{parseFloat((this.miningReward+this.stakingReward+this.extraFlipReward+this.invitationReward) *0.9 ).toFixed(2)}}
+            {{parseFloat((this.miningReward+this.stakingReward+this.extraFlipReward+this.invitationReward) * 1).toFixed(2)}}
             iDNA
           </div>
         </div>
@@ -201,6 +201,7 @@ export default {
       myDelegatee: (state) => state.myDelegatee,
     }),
   },
+
   mounted() {
 
   },
