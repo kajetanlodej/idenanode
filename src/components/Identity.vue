@@ -80,10 +80,6 @@
   </script>
 
   <style>
-  .text-truncate{
-    color:white;
-  }
-  
   #signin{
     width: 50vw;
     height: 100%;
@@ -114,70 +110,11 @@
     background-color: #f0f2f5;
   }
   
-  .address {
-    color: grey;
-  }
-  
-  .button {
-  align-items: center;
-  background-color: #0A66C2;
-  border: 0;
-  box-sizing: border-box;
-  color: #ffffff;
-  cursor: pointer;
-  display: inline-flex;
-  font-size: 16px;
-  font-weight: 300;
-  justify-content: center;
-  line-height: 20px;
-  max-width: 480px;
-  min-height: 40px;
-  min-width: 0px;
-  overflow: hidden;
-  padding: 0px;
-  padding-left: 20px;
-  padding-right: 20px;
-  text-align: center;
-  touch-action: manipulation;
-  transition: background-color 0.167s cubic-bezier(0.4, 0, 0.2, 1) 0s, box-shadow 0.167s cubic-bezier(0.4, 0, 0.2, 1) 0s, color 0.167s cubic-bezier(0.4, 0, 0.2, 1) 0s;
-  user-select: none;
-  -webkit-user-select: none;
-  vertical-align: middle;
-  border-radius: 7px;
-}
-
-.button:hover
- { 
-  background-color: #09223b;
-  color: #ffffff;
-}
-
-.button:active {
-  background: #09223b;
-  color: rgb(255, 255, 255, .7);
-}
-
-.button:disabled { 
-  cursor: not-allowed;
-  background: rgba(0, 0, 0, .08);
-  color: rgba(0, 0, 0, .3);
-}
-
- .subButton {
-  font-size: 10px;
-  margin-top: -2px;
-}
-  
-.mainButton {
-margin-bottom: -2px;
-margin-top: 2px;
-}
-
 .signin-icon {
   display: none;
-  width: 16px; /* Original size */
-  height: 16px; /* Original size */
-  transform: scale(1.5); /* 2x scale */
+  width: 16px;
+  height: 16px;
+  transform: scale(1.5);
 }
 
 @media (min-width: 769px) {

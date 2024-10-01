@@ -51,7 +51,7 @@ a:active {
     width: 800px;
     padding: 20px;
     border-radius: 10px;
-    background-color: #fff;
+    background-color: var(--white);
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
 }
@@ -67,11 +67,11 @@ h1{
   padding-bottom: 10vh;
 }
 .section{
-    width: 80%;
-    font-size: 1.2rem;
-    padding: 15px;
-      overflow-y: scroll;
-      max-height: 140px;
+  width: 80%;
+  font-size: 1.2rem;
+  padding: 15px;
+  overflow-y: scroll;
+  max-height: 140px;
 }
 h1{
   font-size: 1.7rem;

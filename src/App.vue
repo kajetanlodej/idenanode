@@ -18,7 +18,7 @@ import {
   isValidAddress,
 } from "ethereumjs-util";
 import { Buffer } from "buffer";
-import axios from 'axios'
+import axios from 'axios';
 </script>
 
 <template>

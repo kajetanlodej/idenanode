@@ -132,12 +132,9 @@
 <script>
 import { mapActions } from 'vuex';
 import { mapState } from 'vuex'
-import {
-  POOL_ADDRESS,
-} from "../config.js";
-import 'bootstrap';
 import { Conn } from "../connection.js";
 import {
+  POOL_ADDRESS,
   NODE_URL,
   NODE_KEY,
 } from "../config.js";
@@ -147,7 +144,7 @@ import {
 } from "ethereumjs-util";
 import { BN } from "bn.js";
 import * as proto from "../proto/models_pb.js";
-
+import 'bootstrap';
 export default {
   data() {
       const conn = new Conn(this.connected, NODE_URL, NODE_KEY);
@@ -159,13 +156,6 @@ export default {
       countdown1: '00:00:00:00',
       countdownInterval: null,
       validationTime: null,
-      delegators: [],
-      canFetchMore: true,
-      continuationToken: null,
-      limit: 30,
-      allDelegatorsFetched: false,
-      allTransactionsFetched: false,
-      totalDelegators: 0,
       dataLoaded: false,
       weight: null,
       totalShares: null,
@@ -207,7 +197,6 @@ export default {
   },
   methods: {
        sendDelegateTx: async function () {
-
     const argsArray = [
       {
         index: 0,
@@ -240,7 +229,7 @@ export default {
   try {
     // Fetch the latest pending transactions
     this.txgenerated = await this.conn.getPendingTx({
-      address: this.loggedAddress // Assuming 'address' is a required field
+      address: this.loggedAddress
     });
     let delegateFound = false;
     // Check if transactions are present and valid
@@ -348,7 +337,7 @@ const tx = proto.encodeProtoTransaction({
   height: 93.2vh;
   flex-direction: column;
   font-family: "Lexend Exa", sans-serif;
-  color: #131313;
+  color: var(--black);
   justify-content: center;
 }
 
@@ -360,7 +349,6 @@ const tx = proto.encodeProtoTransaction({
   font-size: 1.5rem;
   height: 250px;
   font-weight: 600;
-  color: #131313;
 }
 
 #countdown {
@@ -370,13 +358,12 @@ const tx = proto.encodeProtoTransaction({
   font-size: 1rem;
   margin-top: 2rem;
   font-weight: 600;
-  color: white;
 }
 
 #clock {
   font-size: 3rem;
   font-weight: 200;
-  color: #131313 ;
+  color: var(--black);
 }
 
 #countdowns {
@@ -385,7 +372,7 @@ const tx = proto.encodeProtoTransaction({
   flex-direction: column;
   align-items: center;
   border-radius: 10px;
-  background-color: #fff;
+  background-color: var(--white);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   padding-top:20px;
   padding-bottom:20px;
@@ -403,15 +390,6 @@ const tx = proto.encodeProtoTransaction({
   display: flex;
   justify-content: space-between;
   flex-direction: row;
-}
-
-th {
-  font-weight: 600;
-}
-
-button:disabled {
-  background-color: #cccccc;
-  color: #666666;
 }
 
 #prediction {
@@ -463,10 +441,6 @@ button:disabled {
   justify-content: space-between;
 }
 
-#total {
-  font-size: 1.75rem;
-}
-
 a {
   color: #0866ff;
   text-decoration: none;
@@ -481,6 +455,10 @@ a:active {
   color: #011531; /* Change the link color when it's active */
 }
 
+#total {
+  font-size: 1.75rem;
+}
+
 #address {
   margin-bottom: 0px;
   font-size: 1.9rem;
@@ -493,50 +471,6 @@ a:active {
 
 #right{
   text-align: right;
-}
-
-.button {
-  align-items: center;
-  background-color: #0A66C2;
-  border: 0;
-  box-sizing: border-box;
-  color: #ffffff;
-  cursor: pointer;
-  display: inline-flex;
-  font-size: 16px;
-  font-weight: 300;
-  justify-content: center;
-  line-height: 20px;
-  max-width: 480px;
-  min-height: 40px;
-  min-width: 180px;
-  overflow: hidden;
-  padding: 0px;
-  padding-left: 20px;
-  padding-right: 20px;
-  text-align: center;
-  touch-action: manipulation;
-  transition: background-color 0.167s cubic-bezier(0.4, 0, 0.2, 1) 0s, box-shadow 0.167s cubic-bezier(0.4, 0, 0.2, 1) 0s, color 0.167s cubic-bezier(0.4, 0, 0.2, 1) 0s;
-  user-select: none;
-  -webkit-user-select: none;
-  vertical-align: middle;
-}
-
-.button:hover
- { 
-  background-color: #09223b;
-  color: #ffffff;
-}
-
-.button:active {
-  background: #09223b;
-  color: rgb(255, 255, 255, .7);
-}
-
-.button:disabled { 
-  cursor: not-allowed;
-  background: rgba(0, 0, 0, .08);
-  color: rgba(0, 0, 0, .3);
 }
 
 h3{
@@ -594,22 +528,4 @@ align-items: center;
   display: flex;
   flex-direction: column;  
 }
-
-.loader {
-    width: 24px;
-    height: 24px;
-    border: 3px solid #FFF;
-    border-bottom-color: transparent;
-    border-radius: 50%;
-    box-sizing: border-box;
-    animation: rotation 1s linear infinite;
-    }
-    @keyframes rotation {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
-    } 
 </style>
