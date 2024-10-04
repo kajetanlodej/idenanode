@@ -174,7 +174,7 @@ import { POOL_ADDRESS, NODE_URL, NODE_KEY } from '@/config';
 import { Conn } from "@/connection";
 import Globe from 'globe.gl';
 import texture from '/src/assets/mapLight.png';
-import simplifiedMap from 'src/assets/simplifiedMap.json';
+import simplifiedMap from '/src/assets/simplifiedMap.json';
 export default {
   data: function() {
     const conn = new Conn(this.connected, NODE_URL, NODE_KEY);
