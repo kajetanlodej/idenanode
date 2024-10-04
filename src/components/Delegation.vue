@@ -23,7 +23,7 @@
         <div class="rewards">
           <div>Mining reward:</div>
           <div>
-            {{parseFloat(this.miningReward * 1).toFixed(2)}} iDNA
+            {{parseFloat(this.miningReward * 0.9).toFixed(2)}} iDNA
           </div>
         </div>
         <div class="rewards">
@@ -50,7 +50,7 @@
         <div class="rewards" id="total">
           <div>Total epoch reward:</div>
           <div>
-            {{parseFloat((this.miningReward+this.stakingReward+this.extraFlipReward+this.invitationReward) * 1).toFixed(2)}}
+            {{parseFloat((this.miningReward * 0.9 +this.stakingReward+this.extraFlipReward+this.invitationReward)).toFixed(2)}}
             iDNA
           </div>
         </div>
